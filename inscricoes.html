@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Inscrições | Viver Almonda</title>
+
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      color: #1d2f4a;
+      background: #f7f9fc;
+    }
+
+    /* NAVBAR (igual às outras páginas) */
+    nav {
+      position: sticky;
+      top: 0;
+      width: 100%;
+      background: #0b4c86;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.18);
+      z-index: 10;
+    }
+
+    .nav-wrapper {
+      max-width: 1180px;
+      margin: 0 auto;
+      padding: 16px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .logo img {
+      height: 50px;
+      border-radius: 12px;
+    }
+
+    .menu {
+      display: flex;
+      gap: 14px;
+    }
+
+    .menu a {
+      color: white;
+      text-decoration: none;
+      font-weight: 600;
+      padding: 10px 14px;
+      border-radius: 12px;
+    }
+
+    .menu a:hover {
+      background: rgba(255,255,255,0.15);
+    }
+
+    /* HEADER */
+    header {
+      background: linear-gradient(180deg, #0b4c86 0%, #0462a4 60%, #023f70 100%);
+      color: white;
+      padding: 80px 24px 50px;
+      text-align: center;
+    }
+
+    header h1 {
+      font-size: 3rem;
+      margin: 0;
+    }
+
+    header p {
+      margin-top: 16px;
+      color: #dbe8f6;
+    }
+
+    /* FORM */
+    section {
+      max-width: 800px;
+      margin: auto;
+      padding: 60px 24px;
+    }
+
+    .form-box {
+      background: white;
+      padding: 30px;
+      border-radius: 20px;
+      box-shadow: 0 15px 30px rgba(0,0,0,0.08);
+    }
+
+    label {
+      display: block;
+      margin-top: 18px;
+      font-weight: 600;
+    }
+
+    input, select {
+      width: 100%;
+      padding: 12px;
+      margin-top: 6px;
+      border-radius: 10px;
+      border: 1px solid #ccc;
+      font-size: 1rem;
+    }
+
+    button {
+      margin-top: 25px;
+      width: 100%;
+      padding: 16px;
+      background: #ffcc33;
+      border: none;
+      border-radius: 999px;
+      font-weight: 700;
+      cursor: pointer;
+      color: #0b4c86;
+      font-size: 1rem;
+    }
+
+    button:hover {
+      opacity: 0.9;
+    }
+
+    /* FOOTER */
+    footer {
+      background: #0b4c86;
+      color: white;
+      text-align: center;
+      padding: 28px;
+      margin-top: 60px;
+    }
+  </style>
+</head>
+
+<body>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-wrapper">
+    <div class="logo">
+      <a href="index.html">
+        <img src="logo.jpg" alt="Viver Almonda">
+      </a>
+    </div>
+    <div class="menu">
+      <a href="index.html">Inicio</a>
+      <a href="canoagem.html">Canoagem</a>
+      <a href="cross-trail.html">Cross Trail</a>
+      <a href="workshops.html">Workshops</a>
+      <a href="inscricoes.html">Inscrições</a>
+    </div>
+  </div>
+</nav>
+
+<!-- HEADER -->
+<header>
+  <h1>Inscrição</h1>
+  <p>Preencha o formulário abaixo para garantir a sua vaga</p>
+</header>
+
+<!-- FORM -->
+<section>
+  <div class="form-box">
+    <form action="https://formspree.io/f/SEU_ID_AQUI" method="POST">
+
+      <label>Nome completo</label>
+      <input type="text" name="nome" required>
+
+      <label>Email</label>
+      <input type="email" name="email" required>
+
+      <label>Telefone</label>
+      <input type="text" name="telefone" required>
+
+      <label>Atividade</label>
+      <select name="atividade" required>
+        <option value="Canoagem">Canoagem</option>
+        <option value="Cross Trail">Cross Trail</option>
+      </select>
+
+      <label>Data pretendida</label>
+      <select name="data" required>
+        <option value="">Selecione uma opção</option>
+        <option value="DIA 30 MAIO - MANHÃ">DIA 30 MAIO - MANHÃ</option>
+        <option value="DIA 30 MAIO - TARDE">DIA 30 MAIO - TARDE</option>
+        <option value="DIA 31 MAIO - MANHÃ">DIA 31 MAIO - MANHÃ</option>
+      </select>
+
+      <button type="submit">Finalizar Inscrição</button>
+
+    </form>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <p>© 2025 Viver Almonda</p>
+</footer>
+
+</body>
+</html>
