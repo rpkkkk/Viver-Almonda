@@ -32,6 +32,16 @@
       height: 50px;
       display: flex;
       align-items: center;
+      cursor: pointer;
+    }
+    .logo a {
+      display: flex;
+      align-items: center;
+      text-decoration: none;
+      transition: opacity 0.2s ease;
+    }
+    .logo a:hover {
+      opacity: 0.8;
     }
     .logo img {
       height: 100%;
@@ -67,19 +77,24 @@
     .dropdown-content {
       position: absolute;
       top: 100%;
-      right: 0;
+      left: 0;
+      right: auto;
       display: none;
       min-width: 220px;
       background: #175a9f;
       border-radius: 14px;
       box-shadow: 0 18px 40px rgba(0, 0, 0, 0.22);
       overflow: hidden;
-      animation: fadeIn 0.2s ease forwards;
       z-index: 20;
       margin-top: 6px;
     }
-    .dropdown:hover .dropdown-content {
+    .dropdown-content.active {
       display: block;
+      animation: slideDown 0.3s ease forwards;
+    }
+    .dropdown:hover > .dropdown-btn {
+      background: rgba(255, 255, 255, 0.16);
+      transform: translateY(-1px);
     }
     .dropdown-content a {
       display: block;
@@ -326,12 +341,40 @@
       }
     }
   </style>
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      const dropdownBtn = document.querySelector('.dropdown-btn');
+      const dropdownContent = document.querySelector('.dropdown-content');
+      
+      // Toggle menu when clicking the button
+      dropdownBtn.addEventListener('click', function(e) {
+        e.preventDefault();
+        dropdownContent.classList.toggle('active');
+      });
+      
+      // Close menu when clicking outside
+      document.addEventListener('click', function(e) {
+        if (!e.target.closest('.dropdown')) {
+          dropdownContent.classList.remove('active');
+        }
+      });
+      
+      // Close menu when clicking a link in the dropdown
+      dropdownContent.querySelectorAll('a').forEach(link => {
+        link.addEventListener('click', function() {
+          dropdownContent.classList.remove('active');
+        });
+      });
+    });
+  </script>
 </head>
 <body>
 <nav>
   <div class="nav-wrapper">
     <div class="logo">
-      <img src="logo.jpg" alt="Viver Almonda">
+      <a href="index.html">
+        <img src="logo.jpg" alt="Viver Almonda">
+      </a>
     </div>
     <div class="menu">
       <a href="index.html">Inicio</a>

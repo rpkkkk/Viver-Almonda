@@ -29,11 +29,15 @@
       gap: 20px;
     }
     .logo {
-      color: white;
-      font-size: 1.5rem;
-      font-weight: 800;
-      letter-spacing: 1px;
-      text-transform: uppercase;
+      height: 50px;
+      display: flex;
+      align-items: center;
+    }
+    .logo img {
+      height: 100%;
+      width: auto;
+      max-width: 200px;
+      border-radius: 12px;
     }
     .menu {
       display: flex;
@@ -60,21 +64,33 @@
     .dropdown {
       position: relative;
     }
+    @keyframes slideDown {
+      from { 
+        opacity: 0; 
+        transform: translateY(-12px);
+      }
+      to { 
+        opacity: 1; 
+        transform: translateY(0);
+      }
+    }
     .dropdown-content {
       position: absolute;
-      top: calc(100% + 6px);
-      right: 0;
+      top: 100%;
+      left: 0;
+      right: auto;
       display: none;
       min-width: 220px;
       background: #175a9f;
       border-radius: 14px;
       box-shadow: 0 18px 40px rgba(0, 0, 0, 0.22);
       overflow: hidden;
-      animation: fadeIn 0.2s ease forwards;
       z-index: 20;
+      margin-top: 6px;
     }
-    .dropdown:hover .dropdown-content {
+    .dropdown-content.active {
       display: block;
+      animation: slideDown 0.3s ease forwards;
     }
     .dropdown-content a {
       display: block;
@@ -213,13 +229,43 @@
       }
     }
   </style>
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      const dropdownBtn = document.querySelector('.dropdown-btn');
+      const dropdownContent = document.querySelector('.dropdown-content');
+      
+      // Toggle menu when clicking the button
+      dropdownBtn.addEventListener('click', function(e) {
+        e.preventDefault();
+        dropdownContent.classList.toggle('active');
+      });
+      
+      // Close menu when clicking outside
+      document.addEventListener('click', function(e) {
+        if (!e.target.closest('.dropdown')) {
+          dropdownContent.classList.remove('active');
+        }
+      });
+      
+      // Close menu when clicking a link in the dropdown
+      dropdownContent.querySelectorAll('a').forEach(link => {
+        link.addEventListener('click', function() {
+          dropdownContent.classList.remove('active');
+        });
+      });
+    });
+  </script>
 </head>
 <body>
   <nav>
     <div class="nav-wrapper">
-      <div class="logo">Viver Almonda</div>
+      <div class="logo">
+        <a href="index.html">
+          <img src="logo.jpg" alt="Viver Almonda">
+        </a>
+      </div>
       <div class="menu">
-        <a href="pagina principal.html">Inicio</a>
+        <a href="index.html">Inicio</a>
         <div class="dropdown">
           <a class="dropdown-btn" href="javascript:void(0)">Atividades Desportivas ▾</a>
           <div class="dropdown-content">
