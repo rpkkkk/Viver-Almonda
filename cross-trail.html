@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cross-Trail | Viver Almonda</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      color: #1d2f4a;
+      background: #f7f9fc;
+    }
+    nav {
+      position: sticky;
+      top: 0;
+      width: 100%;
+      background: #0b4c86;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.18);
+      z-index: 10;
+    }
+    .nav-wrapper {
+      max-width: 1180px;
+      margin: 0 auto;
+      padding: 16px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 20px;
+    }
+    .logo {
+      color: white;
+      font-size: 1.5rem;
+      font-weight: 800;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+    }
+    .menu {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+    .menu a,
+    .dropdown-btn {
+      color: white;
+      text-decoration: none;
+      font-weight: 600;
+      padding: 10px 14px;
+      border-radius: 12px;
+      transition: background 0.2s ease, transform 0.2s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .menu a:hover,
+    .dropdown:hover > .dropdown-btn {
+      background: rgba(255, 255, 255, 0.16);
+      transform: translateY(-1px);
+    }
+    .dropdown {
+      position: relative;
+    }
+    .dropdown-content {
+      position: absolute;
+      top: calc(100% + 6px);
+      right: 0;
+      display: none;
+      min-width: 220px;
+      background: #175a9f;
+      border-radius: 14px;
+      box-shadow: 0 18px 40px rgba(0, 0, 0, 0.22);
+      overflow: hidden;
+      animation: fadeIn 0.2s ease forwards;
+      z-index: 20;
+    }
+    .dropdown:hover .dropdown-content {
+      display: block;
+    }
+    .dropdown-content a {
+      display: block;
+      padding: 14px 16px;
+      color: white;
+      text-decoration: none;
+      font-weight: 600;
+    }
+    .dropdown-content a:hover {
+      background: rgba(255, 255, 255, 0.12);
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(-8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    header {
+      background: linear-gradient(180deg, #0b4c86 0%, #0462a4 55%, #023f70 100%);
+      min-height: 420px;
+      display: flex;
+      align-items: center;
+      padding: 80px 28px 48px;
+      color: white;
+    }
+    .hero {
+      max-width: 1180px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 28px;
+    }
+    .hero h1 {
+      margin: 0;
+      font-size: clamp(3rem, 4.5vw, 4.6rem);
+      line-height: 1;
+    }
+    .hero p {
+      margin: 16px 0 0;
+      font-size: 1.05rem;
+      line-height: 1.8;
+      max-width: 720px;
+      color: #dde9f5;
+    }
+    .button-link {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      background: #ffcc33;
+      color: #0b4c86;
+      padding: 16px 26px;
+      border-radius: 999px;
+      font-weight: 700;
+      text-decoration: none;
+      margin-top: 28px;
+      width: fit-content;
+    }
+    section {
+      padding: 60px 24px;
+      max-width: 1180px;
+      margin: auto;
+    }
+    .section-title {
+      margin: 0 0 18px;
+      font-size: 2rem;
+      color: #0b4c86;
+    }
+    .section-text {
+      margin: 0 0 24px;
+      color: #33415b;
+      line-height: 1.8;
+      font-size: 1rem;
+    }
+    .card-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 20px;
+    }
+    .card {
+      background: white;
+      border-radius: 18px;
+      padding: 22px;
+      box-shadow: 0 14px 30px rgba(0, 0, 0, 0.08);
+    }
+    .card h3 {
+      margin: 0 0 12px;
+      font-size: 1.25rem;
+      color: #0b4c86;
+    }
+    .card p {
+      margin: 0;
+      color: #475569;
+      line-height: 1.7;
+    }
+    .footer {
+      background: #0b4c86;
+      color: white;
+      text-align: center;
+      padding: 28px 24px;
+    }
+    .footer p,
+    .footer a {
+      color: white;
+      margin: 6px 0;
+      text-decoration: none;
+    }
+    .contact-grid {
+      display: grid;
+      gap: 18px;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    }
+    .contact-box {
+      background: rgba(255,255,255,0.08);
+      border-radius: 16px;
+      padding: 18px;
+      border: 1px solid rgba(255,255,255,0.16);
+    }
+    .contact-box h4 {
+      margin: 0 0 10px;
+      font-size: 1.1rem;
+    }
+    .contact-box p {
+      margin: 0;
+      color: #f4f7fb;
+      line-height: 1.7;
+    }
+  </style>
+</head>
+<body>
+  <nav>
+    <div class="nav-wrapper">
+      <div class="logo">Viver Almonda</div>
+      <div class="menu">
+        <a href="pagina principal.html">Inicio</a>
+        <div class="dropdown">
+          <a class="dropdown-btn" href="javascript:void(0)">Atividades Desportivas ▾</a>
+          <div class="dropdown-content">
+            <a href="canoagem.html">Canoagem</a>
+            <a href="cross-trail.html">Cross Trail</a>
+          </div>
+        </div>
+        <a href="workshops.html">Workshops</a>
+        <a href="inscricoes.html">Inscrições</a>
+      </div>
+    </div>
+  </nav>
+  <header>
+    <div class="hero">
+      <div>
+        <h1>Cross-Trail</h1>
+        <p>Sente a energia da natureza e supera-te a cada passo! 🌿🏃‍♂️ Vem viver uma experiência única no Cross-Trail junto ao rio Almonda, onde o desafio se encontra com paisagens incríveis.</p>
+        <p>Connosco, não é só uma corrida, é uma celebração do desporto, da comunidade e da beleza natural da região. Aceitas o desafio? Inscreve-te e vem fazer parte desta aventura!</p>
+        <a class="button-link" href="inscricoes.html">Reserve aqui</a>
+      </div>
+      <div class="hero-right">
+        <h2>Desafio e Natureza</h2>
+        <p>O Cross-Trail oferece percurso para todos os níveis, sempre com foco em respeito ambiental e boa disposição.</p>
+      </div>
+    </div>
+  </header>
+  <section>
+    <h2 class="section-title">Galeria de fotos</h2>
+    <div class="card-grid">
+      <div class="card">
+        <h3>Ano 2018</h3>
+        <p>Aceda às fotos aqui e veja a emoção dos corredores na trilha do Almonda.</p>
+      </div>
+      <div class="card">
+        <h3>Ano 2019</h3>
+        <p>Revive os melhores momentos do Cross-Trail e inspira-te para a próxima prova.</p>
+      </div>
+    </div>
+  </section>
+  <section>
+    <h2 class="section-title">Contactos</h2>
+    <div class="contact-grid">
+      <div class="contact-box">
+        <h4>Email</h4>
+        <p>viveralmonda@gmail.com</p>
+      </div>
+      <div class="contact-box">
+        <h4>Onde nos pode encontrar?</h4>
+        <p>Associação Viver Almonda – junto ao rio Almonda, para uma prova com vistas e espírito forte.</p>
+      </div>
+    </div>
+  </section>
+  <footer class="footer">
+    <p>© 2025 Viver Almonda</p>
+    <p><a href="https://www.facebook.com/profile.php?id=100009631387664&locale=pt_PT" target="_blank">Facebook</a> · <a href="https://www.instagram.com/viver_almonda" target="_blank">Instagram</a></p>
+  </footer>
+</body>
+</html>

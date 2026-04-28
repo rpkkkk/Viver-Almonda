@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Viver Almonda</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      color: #1d2f4a;
+      background: #f7f9fc;
+    }
+    nav {
+      position: sticky;
+      top: 0;
+      width: 100%;
+      background: #0b4c86;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.18);
+      z-index: 10;
+    }
+    .nav-wrapper {
+      max-width: 1180px;
+      margin: 0 auto;
+      padding: 16px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 20px;
+    }
+    .logo {
+      color: white;
+      font-size: 1.5rem;
+      font-weight: 800;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+    }
+    .menu {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+    .menu a,
+    .dropdown-btn {
+      color: white;
+      text-decoration: none;
+      font-weight: 600;
+      padding: 10px 14px;
+      border-radius: 12px;
+      transition: background 0.2s ease, transform 0.2s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .menu a:hover,
+    .dropdown:hover > .dropdown-btn {
+      background: rgba(255, 255, 255, 0.16);
+      transform: translateY(-1px);
+    }
+    .dropdown {
+      position: relative;
+    }
+    .dropdown-content {
+      position: absolute;
+      top: calc(100% + 6px);
+      right: 0;
+      display: none;
+      min-width: 220px;
+      background: #175a9f;
+      border-radius: 14px;
+      box-shadow: 0 18px 40px rgba(0, 0, 0, 0.22);
+      overflow: hidden;
+      animation: fadeIn 0.2s ease forwards;
+      z-index: 20;
+    }
+    .dropdown:hover .dropdown-content {
+      display: block;
+    }
+    .dropdown-content a {
+      display: block;
+      padding: 14px 16px;
+      color: white;
+      text-decoration: none;
+      font-weight: 600;
+    }
+    .dropdown-content a:hover {
+      background: rgba(255, 255, 255, 0.12);
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(-8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    header {
+      background: linear-gradient(180deg, #0b4c86 0%, #0462a4 55%, #023f70 100%);
+      min-height: 500px;
+      display: flex;
+      align-items: center;
+      padding: 80px 28px 48px;
+      color: white;
+    }
+    .hero {
+      max-width: 1180px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: 1.1fr 0.9fr;
+      gap: 36px;
+      align-items: center;
+    }
+    .hero-left h1 {
+      margin: 0;
+      font-size: clamp(3rem, 4.5vw, 4.6rem);
+      line-height: 0.98;
+    }
+    .hero-left p {
+      max-width: 620px;
+      font-size: 1.05rem;
+      line-height: 1.8;
+      margin: 24px 0 0;
+      color: #dde9f5;
+    }
+    .hero-right {
+      position: relative;
+      border-radius: 24px;
+      overflow: hidden;
+      box-shadow: 0 18px 40px rgba(0, 0, 0, 0.2);
+      width: 100%;
+      max-width: 540px;
+      margin: auto;
+    }
+    .hero-right img,
+    .gallery img {
+      width: 100%;
+      height: auto;
+      max-height: 520px;
+      object-fit: cover;
+      display: block;
+    }
+    .hero-card {
+      margin-top: 22px;
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.18);
+      border-radius: 24px;
+      padding: 26px;
+      color: #eef2f7;
+    }
+    .hero-card h2 {
+      margin: 0 0 12px;
+      font-size: 1.4rem;
+      color: #ffffff;
+    }
+    .hero-card p {
+      margin: 0;
+      line-height: 1.8;
+      color: #d8e6f6;
+    }
+    .cta-button {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      margin-top: 28px;
+      padding: 16px 28px;
+      background: #ffcc33;
+      border-radius: 999px;
+      color: #0b4c86;
+      font-weight: 700;
+      text-decoration: none;
+    }
+    section {
+      padding: 60px 24px;
+      max-width: 1180px;
+      margin: auto;
+      color: #1d2f4a;
+      background: #f7f9fc;
+    }
+    .section-title {
+      font-size: clamp(2rem, 2.5vw, 2.6rem);
+      margin: 0 0 16px;
+      color: #0b4c86;
+    }
+    .section-text {
+      margin: 0 0 32px;
+      color: #475569;
+      line-height: 1.8;
+      font-size: 1rem;
+    }
+    .card-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 22px;
+    }
+    .card {
+      background: white;
+      border-radius: 18px;
+      padding: 24px;
+      box-shadow: 0 14px 30px rgba(0, 0, 0, 0.08);
+    }
+    .card h3 {
+      margin: 0 0 14px;
+      font-size: 1.25rem;
+      color: #0b4c86;
+    }
+    .card p {
+      margin: 0;
+      color: #475569;
+      line-height: 1.7;
+    }
+    .about-list {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+      display: grid;
+      gap: 14px;
+    }
+    .about-list li {
+      padding: 18px 20px;
+      border-radius: 16px;
+      background: #ffffff;
+      box-shadow: 0 12px 24px rgba(0, 0, 0, 0.07);
+      color: #213145;
+      line-height: 1.7;
+    }
+    .about-highlight {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 18px;
+      margin-top: 36px;
+    }
+    .highlight-box {
+      background: #0b4c86;
+      color: white;
+      border-radius: 20px;
+      padding: 24px;
+    }
+    .highlight-box h3 {
+      margin: 0 0 14px;
+      font-size: 1.3rem;
+    }
+    .highlight-box p,
+    .highlight-box a {
+      margin: 0;
+      color: #dfe8f5;
+      line-height: 1.8;
+    }
+    .contact-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 22px;
+    }
+    .contact-card {
+      background: white;
+      border-radius: 18px;
+      padding: 24px;
+      box-shadow: 0 14px 30px rgba(0, 0, 0, 0.08);
+    }
+    .contact-card h3 {
+      margin: 0 0 12px;
+      color: #0b4c86;
+    }
+    .contact-card p {
+      margin: 0;
+      color: #475569;
+      line-height: 1.75;
+    }
+    .gallery {
+      display: grid;
+      gap: 18px;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      max-width: 980px;
+      margin: auto;
+    }
+    .gallery img {
+      width: 100%;
+      max-width: 100%;
+      height: auto;
+      max-height: 420px;
+      object-fit: cover;
+      display: block;
+      border-radius: 18px;
+      box-shadow: 0 14px 30px rgba(0, 0, 0, 0.08);
+    }
+    footer {
+      background: #0b4c86;
+      color: white;
+      text-align: center;
+      padding: 28px 24px;
+    }
+    footer a {
+      color: #ffdd70;
+      text-decoration: none;
+    }
+    .top-boxes {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 20px;
+      margin-top: 40px;
+    }
+    .top-box {
+      background: rgba(255, 255, 255, 0.12);
+      border: 1px solid rgba(255, 255, 255, 0.18);
+      border-radius: 20px;
+      padding: 22px;
+      text-align: center;
+    }
+    .top-box h4 {
+      margin: 0 0 12px;
+      font-size: 1.15rem;
+      color: #ffffff;
+    }
+    .top-box p {
+      margin: 0;
+      color: #e8f1fb;
+      line-height: 1.75;
+    }
+    @media (max-width: 900px) {
+      header {
+        padding: 60px 18px 32px;
+      }
+      .hero {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+<nav>
+  <div class="nav-wrapper">
+    <div class="logo">Viver Almonda</div>
+    <div class="menu">
+      <a href="pagina principal.html">Inicio</a>
+      <div class="dropdown">
+        <a class="dropdown-btn" href="javascript:void(0)">Atividades Desportivas ▾</a>
+        <div class="dropdown-content">
+          <a href="canoagem.html">Canoagem</a>
+          <a href="cross-trail.html">Cross Trail</a>
+        </div>
+      </div>
+      <a href="workshops.html">Workshops</a>
+      <a href="inscricoes.html">Inscrições</a>
+    </div>
+  </div>
+</nav>
+<header>
+  <div class="hero">
+    <div class="hero-left">
+      <h1>Viver Almonda</h1>
+      <p>Descubra o Viver Almonda, um espaço que promove qualidade de vida e bem-estar em Torres Novas, com atividades para todas as idades.</p>
+      <p>Participe em experiências que unem desporto, natureza e proteção do rio Almonda. Navegue pela nossa oferta de canoagem, cross-trail e ações de apoio a este território único.</p>
+      <a class="cta-button" href="inscricoes.html">Inscreva-se</a>
+    </div>
+    <div class="hero-right">
+      <img src="https://assets.zyrosite.com/cdn-cgi/image/format=auto,w=768,h=900,fit=crop/ALp2ZqewowIJrN22/site1-N3Ugrgw1kwzy0HHP.jpg" alt="Viver Almonda natureza e rio Almonda">
+      <div class="hero-card">
+        <h2>Viver Almonda</h2>
+        <p>A nossa missão é proteger o rio, inspirar a comunidade e criar experiências que ligam as pessoas à natureza de forma ativa e sustentável.</p>
+      </div>
+    </div>
+  </div>
+</header>
+<section>
+  <h2 class="section-title">O que fazemos</h2>
+  <div class="top-boxes">
+    <div class="top-box">
+      <h4>Cuidamos do Rio</h4>
+      <p>O Almonda é a nossa prioridade: cuidar das margens, manter o ecossistema e promover práticas sustentáveis.</p>
+    </div>
+    <div class="top-box">
+      <h4>Celebramos a força da Natureza</h4>
+      <p>Respiramos o poder da paisagem e criamos atividades que valorizam a biodiversidade local.</p>
+    </div>
+    <div class="top-box">
+      <h4>Protegemos o nosso futuro</h4>
+      <p>Cada ação visa deixar o rio melhor do que o encontramos, para as próximas gerações.</p>
+    </div>
+    <div class="top-box">
+      <h4>Somos o Viver Almonda</h4>
+      <p>Uma comunidade que junta desporto, educação ambiental e vontade de viver o Almonda em liberdade.</p>
+    </div>
+  </div>
+</section>
+<section>
+  <h2 class="section-title">Sobre Nós</h2>
+  <p class="section-text">A Associação Viver Almonda nasceu com uma missão clara e urgente: garantir a dignidade que o rio Almonda merece. Trabalhamos com respeito ao meio ambiente e ao património natural, criando experiências desportivas que fazem sentido para toda a comunidade.</p>
+  <ul class="about-list">
+    <li>A Associação Viver Almonda nasceu com uma missão clara e urgente: garantir a dignidade que o Rio Almonda merece.</li>
+    <li>O rio é mais do que um curso de água, é um caminho de vida, um refúgio de biodiversidade, um espaço de encontro entre pessoas e natureza.</li>
+    <li>Cuidar dele é cuidar da identidade de todos os que crescem, vivem e sonham junto às suas margens.</li>
+    <li>Atuamos onde a vida acontece, no rio, nas suas margens, em tudo o que nasce e floresce, limpando, protegendo, restaurando e educando.</li>
+    <li>Cada ação é um gesto de respeito, cada projeto uma promessa de futuro.</li>
+    <li>Acreditamos que o rio só pode ser plenamente vivido quando é bem cuidado e é por isso que unimos a proteção ambiental a práticas desportivas, lúdicas e sustentáveis, criando experiências que aproximam as pessoas à natureza.</li>
+  </ul>
+  <div class="about-highlight">
+    <div class="highlight-box">
+      <h3>Remar é mais do que desporto</h3>
+      <p>É um compromisso de ligação ao rio e ao ambiente.</p>
+    </div>
+    <div class="highlight-box">
+      <h3>Caminhar pela margem</h3>
+      <p>É mais que lazer: é vigilância e amor pelo território.</p>
+    </div>
+    <div class="highlight-box">
+      <h3>Participar é fazer parte</h3>
+      <p>É assumir o dever de deixar o Almonda melhor do que o encontramos.</p>
+    </div>
+    <div class="highlight-box">
+      <h3>A nossa missão</h3>
+      <p>Proteger o rio, inspirar a comunidade e garantir que a vida continue a prosperar tão livre quanto a própria água.</p>
+    </div>
+  </div>
+</section>
+<section>
+  <h2 class="section-title">Galeria</h2>
+  <div class="gallery">
+    <img src="https://assets.zyrosite.com/cdn-cgi/image/format=auto,w=768,h=889,fit=crop/ALp2ZqewowIJrN22/site6-6DdDB2SzMUmcxA4l.jpg" alt="Atividades Viver Almonda">
+    <img src="https://assets.zyrosite.com/cdn-cgi/image/format=auto,w=768,h=900,fit=crop/ALp2ZqewowIJrN22/site1-N3Ugrgw1kwzy0HHP.jpg" alt="Rio Almonda e natureza">
+  </div>
+</section>
+<section>
+  <h2 class="section-title">Quer ser Sócio?</h2>
+  <p class="section-text">Junte-se ao Viver Almonda e faça parte de um projeto que protege o rio e promove atividades de bem-estar junto à natureza.</p>
+  <a class="cta-button" href="inscricoes.html">Clique aqui</a>
+</section>
+<section>
+  <h2 class="section-title">Contactos</h2>
+  <div class="contact-grid">
+    <div class="contact-card">
+      <h3>Email</h3>
+      <p>viveralmonda@gmail.com</p>
+    </div>
+    <div class="contact-card">
+      <h3>Onde nos pode encontrar?</h3>
+      <p>Associação Viver Almonda está junto ao rio Almonda, em Torres Novas.</p>
+    </div>
+  </div>
+</section>
+<footer>
+  <p>© 2025 Viver Almonda</p>
+  <p><a href="https://www.facebook.com/profile.php?id=100009631387664&locale=pt_PT" target="_blank">Facebook</a> · <a href="https://www.instagram.com/viver_almonda" target="_blank">Instagram</a></p>
+</footer>
+</body>
+</html>
