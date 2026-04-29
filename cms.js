@@ -9,8 +9,31 @@
     ]
   };
 
+  const HOME_ABOUT_CONTENT = {
+    title: "Sobre Nos",
+    text: "A Associacao Viver Almonda nasceu com uma missao clara e urgente: garantir a dignidade que o rio Almonda merece. Trabalhamos com respeito ao meio ambiente e ao patrimonio natural, criando experiencias desportivas que fazem sentido para toda a comunidade.",
+    items: [
+      { text: "A Associacao Viver Almonda nasceu com uma missao clara e urgente: garantir a dignidade que o Rio Almonda merece." },
+      { text: "O rio e mais do que um curso de agua, e um caminho de vida, um refugio de biodiversidade, um espaco de encontro entre pessoas e natureza." },
+      { text: "Cuidar dele e cuidar da identidade de todos os que crescem, vivem e sonham junto as suas margens." },
+      { text: "Atuamos onde a vida acontece, no rio, nas suas margens, em tudo o que nasce e floresce, limpando, protegendo, restaurando e educando." },
+      { text: "Cada acao e um gesto de respeito, cada projeto uma promessa de futuro." },
+      { text: "Acreditamos que o rio so pode ser plenamente vivido quando e bem cuidado e e por isso que unimos a protecao ambiental a praticas desportivas, ludicas e sustentaveis, criando experiencias que aproximam as pessoas a natureza." }
+    ],
+    highlights: [
+      { title: "Remar e mais do que desporto", text: "E um compromisso de ligacao ao rio e ao ambiente." },
+      { title: "Caminhar pela margem", text: "E mais que lazer: e vigilancia e amor pelo territorio." },
+      { title: "Participar e fazer parte", text: "E assumir o dever de deixar o Almonda melhor do que o encontramos." },
+      { title: "A nossa missao", text: "Proteger o rio, inspirar a comunidade e garantir que a vida continue a prosperar tao livre quanto a propria agua." }
+    ]
+  };
+
   function cloneSharedContact() {
     return JSON.parse(JSON.stringify(SHARED_CONTACT));
+  }
+
+  function cloneHomeAboutContent() {
+    return JSON.parse(JSON.stringify(HOME_ABOUT_CONTENT));
   }
 
   function applySharedContact(block) {
@@ -60,13 +83,7 @@
           id: "home-about",
           type: "list",
           visible: true,
-          title: "Sobre Nos",
-          text: "A Associacao Viver Almonda nasceu com uma missao clara e urgente: garantir a dignidade que o rio Almonda merece.",
-          items: [
-            { text: "O rio e mais do que um curso de agua, e um caminho de vida, um refugio de biodiversidade e um espaco de encontro." },
-            { text: "Cuidar dele e cuidar da identidade de todos os que vivem junto as suas margens." },
-            { text: "Unimos protecao ambiental a praticas desportivas, ludicas e sustentaveis." }
-          ]
+          ...cloneHomeAboutContent()
         },
         {
           id: "home-gallery",
@@ -217,7 +234,7 @@
   }
 
   function normalizeBlock(block) {
-    return applySharedContact({
+    const normalized = {
       id: block.id || `block-${Date.now()}-${Math.random().toString(16).slice(2)}`,
       type: block.type || "text",
       visible: block.visible !== false,
@@ -230,8 +247,19 @@
       buttonText: block.buttonText || "",
       buttonUrl: block.buttonUrl || "",
       mapUrl: block.mapUrl || "",
-      items: Array.isArray(block.items) ? block.items.map((item) => ({ ...item })) : []
-    });
+      items: Array.isArray(block.items) ? block.items.map((item) => ({ ...item })) : [],
+      highlights: Array.isArray(block.highlights) ? block.highlights.map((item) => ({ ...item })) : []
+    };
+
+    if (normalized.id === "home-about") {
+      const about = cloneHomeAboutContent();
+      normalized.title = normalized.title || about.title;
+      normalized.text = normalized.text || about.text;
+      normalized.items = normalized.items.length >= 4 ? normalized.items : about.items;
+      normalized.highlights = normalized.highlights.length ? normalized.highlights : about.highlights;
+    }
+
+    return applySharedContact(normalized);
   }
 
   function renderButton(block) {
@@ -289,7 +317,15 @@
 
   function renderList(block) {
     const items = block.items.map((item) => `<li>${escapeHtml(item.text || item.title)}</li>`).join("");
-    return renderSection(block, `<ul class="cms-list">${items}</ul>`);
+    const highlights = (block.highlights || []).map((item) => `
+      <article class="cms-highlight-box">
+        <h3>${escapeHtml(item.title)}</h3>
+        ${paragraphs(item.text)}
+      </article>
+    `).join("");
+    const highlightGrid = highlights ? `<div class="cms-about-highlight">${highlights}</div>` : "";
+
+    return renderSection(block, `<ul class="cms-list">${items}</ul>${highlightGrid}`);
   }
 
   function renderImage(block) {

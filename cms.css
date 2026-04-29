@@ -158,11 +158,37 @@
   line-height: 1.7;
 }
 
+.cms-about-highlight {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 18px;
+  margin-top: 36px;
+}
+
+.cms-highlight-box {
+  padding: 24px;
+  border-radius: 20px;
+  background: #0b4c86;
+  color: white;
+}
+
+.cms-highlight-box h3 {
+  margin: 0 0 14px;
+  font-size: 1.3rem;
+}
+
+.cms-highlight-box p {
+  margin: 0;
+  color: #dfe8f5;
+  line-height: 1.8;
+}
+
 .cms-gallery {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
   gap: 18px;
-  margin-top: 26px;
+  max-width: 980px;
+  margin: 26px auto 0;
 }
 
 .cms-gallery figure {
