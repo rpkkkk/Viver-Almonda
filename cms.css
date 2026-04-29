@@ -197,22 +197,32 @@
 }
 
 .cms-gallery figure {
+  display: grid;
+  gap: 8px;
+  align-content: start;
   margin: 0;
 }
 
-.cms-gallery img,
-.cms-image img {
+.cms-gallery img {
   aspect-ratio: 4 / 3;
-  height: 100%;
+  height: auto;
+  max-height: 420px;
+  border-radius: 18px;
+  box-shadow: 0 14px 30px rgba(0, 0, 0, 0.08);
+}
+
+.cms-image img {
+  height: auto;
   max-height: 420px;
   border-radius: 18px;
   box-shadow: 0 14px 30px rgba(0, 0, 0, 0.08);
 }
 
 .cms-gallery figcaption {
-  margin-top: 8px;
+  margin: 0;
   color: #64748b;
   font-size: 0.92rem;
+  line-height: 1.35;
 }
 
 .cms-cta {

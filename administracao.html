@@ -950,8 +950,20 @@ function getUploadErrorMessage(error) {
     return "Upload bloqueado pelo Firebase Storage. Confirma as regras de permissao.";
   }
 
+  if (error?.code === "storage/unauthenticated") {
+    return "Tens de estar com login feito para carregar fotos.";
+  }
+
   if (error?.code === "storage/bucket-not-found") {
     return "Bucket do Firebase Storage nao encontrado. Confirma o storageBucket no auth.js.";
+  }
+
+  if (error?.code === "storage/quota-exceeded") {
+    return "O Firebase Storage atingiu o limite de espaco ou quota.";
+  }
+
+  if (error?.code === "storage/retry-limit-exceeded") {
+    return "O upload demorou demasiado tempo. Confirma a ligacao ou as regras do Firebase Storage.";
   }
 
   if (error?.code === "storage/canceled") {
@@ -993,6 +1005,43 @@ function getImageFiles(fileList) {
   return Array.from(fileList || []).filter((file) => String(file.type || "").startsWith("image/"));
 }
 
+function uploadFileWithProgress(ref, file, metadata, onProgress) {
+  return new Promise((resolve, reject) => {
+    let uploadTask = null;
+    const timeout = window.setTimeout(() => {
+      uploadTask?.cancel();
+      reject({ code: "storage/retry-limit-exceeded" });
+    }, 90000);
+
+    try {
+      uploadTask = ref.put(file, metadata);
+    } catch (error) {
+      window.clearTimeout(timeout);
+      reject(error);
+      return;
+    }
+
+    uploadTask.on("state_changed", (snapshot) => {
+      const percent = snapshot.totalBytes
+        ? Math.round((snapshot.bytesTransferred / snapshot.totalBytes) * 100)
+        : 0;
+
+      onProgress(percent);
+    }, (error) => {
+      window.clearTimeout(timeout);
+      reject(error);
+    }, async () => {
+      window.clearTimeout(timeout);
+
+      try {
+        resolve(await uploadTask.snapshot.ref.getDownloadURL());
+      } catch (error) {
+        reject(error);
+      }
+    });
+  });
+}
+
 async function uploadGalleryFiles(blockId, fileList) {
   const block = findVisualBlock(blockId);
 
@@ -1002,6 +1051,11 @@ async function uploadGalleryFiles(blockId, fileList) {
 
   if (!window.storage) {
     setGalleryUploadStatus(blockId, "Firebase Storage nao esta ativo nesta pagina.", true);
+    return;
+  }
+
+  if (!window.auth.currentUser) {
+    setGalleryUploadStatus(blockId, "Inicia sessao antes de carregar fotos.", true);
     return;
   }
 
@@ -1020,15 +1074,16 @@ async function uploadGalleryFiles(blockId, fileList) {
 
       const title = getFileTitle(file.name);
       const ref = window.storage.ref(getUploadPath(block, file, index));
-      const snapshot = await ref.put(file, {
+      const image = await uploadFileWithProgress(ref, file, {
         contentType: file.type || "image/jpeg",
         customMetadata: {
           pageId: visualPageId,
           blockId: block.id,
           uploadedBy: window.auth.currentUser?.email || ""
         }
+      }, (percent) => {
+        setGalleryUploadStatus(blockId, `A carregar imagem ${index + 1} de ${files.length}: ${file.name} (${percent}%)`);
       });
-      const image = await snapshot.ref.getDownloadURL();
 
       const uploadedItem = {
         title,
