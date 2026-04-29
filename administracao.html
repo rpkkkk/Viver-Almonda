@@ -534,7 +534,9 @@ function handleProfile(profile) {
     return;
   }
 
-  if (profile?.permissao !== "admin") {
+  const isAdmin = profile?.permissao === "admin" || window.isAdminEmail?.(window.auth.currentUser.email);
+
+  if (!isAdmin) {
     stopUsersListener();
     setAdminView("denied");
     return;

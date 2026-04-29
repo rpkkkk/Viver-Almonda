@@ -18,6 +18,34 @@ window.auth = auth;
 window.db = db;
 window.currentUserProfile = null;
 
+function isAdminEmail(email) {
+  return ADMIN_EMAILS.includes(String(email || "").trim().toLowerCase());
+}
+
+function buildUserProfile(user, savedProfile) {
+  if (!user) {
+    return null;
+  }
+
+  const email = user.email || "";
+  const profile = savedProfile || {};
+
+  return {
+    uid: user.uid,
+    nome: user.displayName || "",
+    email,
+    foto: user.photoURL || "",
+    ...profile,
+    permissao: isAdminEmail(email) ? "admin" : profile.permissao || "membro"
+  };
+}
+
+function isAdminUser(user, profile) {
+  return Boolean(user && (isAdminEmail(user.email) || profile?.permissao === "admin"));
+}
+
+window.isAdminEmail = isAdminEmail;
+
 function login(event) {
   if (event) {
     event.preventDefault();
@@ -64,7 +92,7 @@ async function saveUserProfile(user) {
   const userRef = db.collection("users").doc(user.uid);
   const now = firebase.firestore.FieldValue.serverTimestamp();
   const email = user.email || "";
-  const isDefaultAdmin = ADMIN_EMAILS.includes(email.toLowerCase());
+  const isDefaultAdmin = isAdminEmail(email);
   const baseData = {
     uid: user.uid,
     nome: user.displayName || "",
@@ -95,10 +123,10 @@ async function saveUserProfile(user) {
     });
 
     const savedSnapshot = await userRef.get();
-    return savedSnapshot.exists ? savedSnapshot.data() : null;
+    return buildUserProfile(user, savedSnapshot.exists ? savedSnapshot.data() : null);
   } catch (error) {
     console.error("User profile error:", error);
-    return null;
+    return buildUserProfile(user, null);
   }
 }
 
@@ -166,17 +194,19 @@ function ensureUserMenus() {
 }
 
 function updateAuthUI(user, profile) {
+  const isAdmin = isAdminUser(user, profile);
+
   document.body.classList.add("auth-ready");
   document.body.classList.toggle("is-logged-in", Boolean(user));
   document.body.classList.toggle("is-logged-out", !user);
-  document.body.classList.toggle("is-admin", profile?.permissao === "admin");
+  document.body.classList.toggle("is-admin", isAdmin);
 
   document.querySelectorAll("[data-login-link]").forEach((link) => {
     link.hidden = Boolean(user);
   });
 
   document.querySelectorAll("[data-admin-link]").forEach((link) => {
-    link.hidden = profile?.permissao !== "admin";
+    link.hidden = !isAdmin;
   });
 
   document.querySelectorAll("[data-user-menu]").forEach((menu) => {
