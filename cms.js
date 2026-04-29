@@ -1,4 +1,31 @@
 (function () {
+  const SHARED_CONTACT = {
+    mapUrl: "https://www.google.com/maps?q=39.495872,-8.575388&z=13&output=embed",
+    buttonText: "Abrir no Google Maps",
+    buttonUrl: "https://maps.google.com/?q=39.495872,-8.575388",
+    items: [
+      { title: "Email", text: "viveralmonda@gmail.com" },
+      { title: "Onde nos pode encontrar?", text: "Associacao Viver Almonda esta junto ao rio Almonda, em Torres Novas." }
+    ]
+  };
+
+  function cloneSharedContact() {
+    return JSON.parse(JSON.stringify(SHARED_CONTACT));
+  }
+
+  function applySharedContact(block) {
+    if (block.type !== "contact") {
+      return block;
+    }
+
+    return {
+      ...block,
+      title: "Contactos",
+      text: "",
+      ...cloneSharedContact()
+    };
+  }
+
   const DEFAULT_PAGES = {
     home: {
       name: "Pagina inicial",
@@ -67,13 +94,7 @@
           visible: true,
           title: "Contactos",
           text: "",
-          mapUrl: "https://www.google.com/maps?q=39.495872,-8.575388&z=13&output=embed",
-          buttonText: "Abrir no Google Maps",
-          buttonUrl: "https://maps.google.com/?q=39.495872,-8.575388",
-          items: [
-            { title: "Email", text: "viveralmonda@gmail.com" },
-            { title: "Onde nos pode encontrar?", text: "Associacao Viver Almonda esta junto ao rio Almonda, em Torres Novas." }
-          ]
+          ...cloneSharedContact()
         }
       ]
     },
@@ -108,10 +129,7 @@
           visible: true,
           title: "Contactos",
           text: "",
-          items: [
-            { title: "Email", text: "viveralmonda@gmail.com" },
-            { title: "Onde nos pode encontrar?", text: "Associacao Viver Almonda, perto do rio Almonda, em Torres Novas." }
-          ]
+          ...cloneSharedContact()
         }
       ]
     },
@@ -146,10 +164,7 @@
           visible: true,
           title: "Contactos",
           text: "",
-          items: [
-            { title: "Email", text: "viveralmonda@gmail.com" },
-            { title: "Onde nos pode encontrar?", text: "Associacao Viver Almonda, junto ao rio Almonda, para uma prova com vistas e espirito forte." }
-          ]
+          ...cloneSharedContact()
         }
       ]
     }
@@ -202,7 +217,7 @@
   }
 
   function normalizeBlock(block) {
-    return {
+    return applySharedContact({
       id: block.id || `block-${Date.now()}-${Math.random().toString(16).slice(2)}`,
       type: block.type || "text",
       visible: block.visible !== false,
@@ -216,7 +231,7 @@
       buttonUrl: block.buttonUrl || "",
       mapUrl: block.mapUrl || "",
       items: Array.isArray(block.items) ? block.items.map((item) => ({ ...item })) : []
-    };
+    });
   }
 
   function renderButton(block) {
@@ -333,7 +348,7 @@
 
   function renderCmsPage(page, container) {
     container.classList.remove("is-loading");
-    container.innerHTML = page.blocks.map(renderBlock).join("");
+    container.innerHTML = page.blocks.map((block) => renderBlock(applySharedContact(block))).join("");
   }
 
   function getPageRef(pageId) {
@@ -388,6 +403,7 @@
 
   window.CMS_BLOCK_TYPES = BLOCK_TYPES;
   window.CMS_DEFAULT_PAGES = DEFAULT_PAGES;
+  window.getCmsSharedContact = cloneSharedContact;
   window.cloneCmsDefaultPage = getDefaultPage;
   window.normalizeCmsPage = normalizePage;
   window.normalizeCmsBlock = normalizeBlock;

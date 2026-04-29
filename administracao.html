@@ -917,7 +917,13 @@ function createBlock(type) {
   }
 
   if (type === "contact") {
-    block.items = [{ title: "Contacto", text: "" }];
+    block.title = "Contactos";
+    Object.assign(block, window.getCmsSharedContact ? window.getCmsSharedContact() : {
+      items: [
+        { title: "Email", text: "viveralmonda@gmail.com" },
+        { title: "Onde nos pode encontrar?", text: "Associacao Viver Almonda esta junto ao rio Almonda, em Torres Novas." }
+      ]
+    });
   }
 
   return block;
