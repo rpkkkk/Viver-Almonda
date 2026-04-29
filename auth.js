@@ -10,6 +10,9 @@ if (!firebase.apps.length) {
 
 const auth = firebase.auth();
 const db = firebase.firestore ? firebase.firestore() : null;
+const ADMIN_EMAILS = [
+  "rodrigo.pereira6035@gmail.com"
+];
 
 window.auth = auth;
 window.db = db;
@@ -60,10 +63,12 @@ async function saveUserProfile(user) {
 
   const userRef = db.collection("users").doc(user.uid);
   const now = firebase.firestore.FieldValue.serverTimestamp();
+  const email = user.email || "";
+  const isDefaultAdmin = ADMIN_EMAILS.includes(email.toLowerCase());
   const baseData = {
     uid: user.uid,
     nome: user.displayName || "",
-    email: user.email || "",
+    email,
     foto: user.photoURL || "",
     updatedAt: now,
     lastLoginAt: now
@@ -77,14 +82,14 @@ async function saveUserProfile(user) {
         const existingData = snapshot.data() || {};
         transaction.set(userRef, {
           ...baseData,
-          permissao: existingData.permissao || "membro"
+          permissao: isDefaultAdmin ? "admin" : existingData.permissao || "membro"
         }, { merge: true });
         return;
       }
 
       transaction.set(userRef, {
         ...baseData,
-        permissao: "membro",
+        permissao: isDefaultAdmin ? "admin" : "membro",
         createdAt: now
       });
     });
