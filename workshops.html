@@ -1,0 +1,383 @@
+﻿<!DOCTYPE html>
+<html lang="pt">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Workshops | Viver Almonda</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      color: #1d2f4a;
+      background: #f7f9fc;
+    }
+    nav {
+      position: sticky;
+      top: 0;
+      width: 100%;
+      background: #0b4c86;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.18);
+      z-index: 10;
+    }
+    .nav-wrapper {
+      max-width: 1180px;
+      margin: 0 auto;
+      padding: 16px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 20px;
+    }
+    .logo {
+      height: 50px;
+      display: flex;
+      align-items: center;
+      cursor: pointer;
+    }
+    .logo a {
+      display: flex;
+      align-items: center;
+      text-decoration: none;
+      transition: opacity 0.2s ease;
+    }
+    .logo a:hover {
+      opacity: 0.8;
+    }
+    .logo img {
+      height: 100%;
+      width: auto;
+      max-width: 200px;
+      border-radius: 12px;
+    }
+    .menu {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+    .menu a,
+    .dropdown-btn {
+      color: white;
+      text-decoration: none;
+      font-weight: 600;
+      padding: 10px 14px;
+      border-radius: 12px;
+      transition: background 0.2s ease, transform 0.2s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .menu a:hover,
+    .dropdown:hover > .dropdown-btn {
+      background: rgba(255, 255, 255, 0.16);
+      transform: translateY(-1px);
+    }
+    .dropdown {
+      position: relative;
+    }
+    .dropdown-content {
+      position: absolute;
+      top: 100%;
+      left: 0;
+      right: auto;
+      display: none;
+      min-width: 220px;
+      background: #175a9f;
+      border-radius: 14px;
+      box-shadow: 0 18px 40px rgba(0, 0, 0, 0.22);
+      overflow: hidden;
+      z-index: 20;
+      margin-top: 6px;
+    }
+    .dropdown-content.active {
+      display: block;
+      animation: slideDown 0.3s ease forwards;
+    }
+    .dropdown-content a {
+      display: block;
+      padding: 14px 16px;
+      color: white;
+      text-decoration: none;
+      font-weight: 600;
+    }
+    .dropdown-content a:hover {
+      background: rgba(255, 255, 255, 0.12);
+    }
+    @keyframes slideDown {
+      from { opacity: 0; transform: translateY(-12px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(-8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    header {
+      background: linear-gradient(180deg, #0b4c86 0%, #0462a4 55%, #023f70 100%);
+      min-height: 420px;
+      display: flex;
+      align-items: center;
+      padding: 80px 28px 48px;
+      color: white;
+    }
+    .hero {
+      max-width: 1180px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: 1.1fr 0.9fr;
+      gap: 32px;
+      align-items: center;
+    }
+    .hero-left h1 {
+      margin: 0;
+      font-size: clamp(3rem, 4.5vw, 4.6rem);
+      line-height: 0.98;
+    }
+    .hero-left p {
+      max-width: 620px;
+      font-size: 1.05rem;
+      line-height: 1.8;
+      margin: 24px 0 0;
+      color: #dde9f5;
+    }
+    .hero-right {
+      position: relative;
+      border-radius: 24px;
+      overflow: hidden;
+      box-shadow: 0 18px 40px rgba(0, 0, 0, 0.2);
+      width: 100%;
+      max-width: 540px;
+      margin: auto;
+    }
+    .hero-right h2 {
+      margin: 0;
+      font-size: 1.6rem;
+      color: white;
+      padding: 26px 24px 12px;
+    }
+    .hero-right p {
+      margin: 0;
+      padding: 0 24px 24px;
+      color: #d8e6f6;
+      line-height: 1.8;
+    }
+    .hero-card {
+      margin-top: 22px;
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.18);
+      border-radius: 24px;
+      padding: 26px;
+      color: #eef2f7;
+    }
+    .hero-card h2 {
+      margin: 0 0 12px;
+      font-size: 1.4rem;
+      color: #ffffff;
+    }
+    .hero-card p {
+      margin: 0;
+      line-height: 1.8;
+      color: #d8e6f6;
+    }
+    .cta-button,
+    .button-link {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      margin-top: 28px;
+      padding: 16px 28px;
+      background: #ffcc33;
+      border-radius: 999px;
+      color: #0b4c86;
+      font-weight: 700;
+      text-decoration: none;
+    }
+    section {
+      padding: 60px 24px;
+      max-width: 1180px;
+      margin: auto;
+      color: #1d2f4a;
+      background: #f7f9fc;
+    }
+    .section-title {
+      font-size: clamp(2rem, 2.5vw, 2.6rem);
+      margin: 0 0 16px;
+      color: #0b4c86;
+    }
+    .section-text {
+      margin: 0 0 32px;
+      color: #475569;
+      line-height: 1.8;
+      font-size: 1rem;
+    }
+    .card-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 22px;
+    }
+    .card {
+      background: white;
+      border-radius: 18px;
+      padding: 24px;
+      box-shadow: 0 14px 30px rgba(0, 0, 0, 0.08);
+    }
+    .card h3 {
+      margin: 0 0 14px;
+      font-size: 1.25rem;
+      color: #0b4c86;
+    }
+    .card p {
+      margin: 0;
+      color: #475569;
+      line-height: 1.7;
+    }
+    .footer {
+      background: #0b4c86;
+      color: white;
+      text-align: center;
+      padding: 28px 24px;
+    }
+    .footer p,
+    .footer a {
+      color: white;
+      margin: 6px 0;
+      text-decoration: none;
+    }
+    .contact-grid {
+      display: grid;
+      gap: 18px;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    }
+    .contact-box {
+      background: #ffffff;
+      border-radius: 18px;
+      padding: 24px;
+      border: 0;
+      box-shadow: 0 14px 30px rgba(0, 0, 0, 0.08);
+    }
+    .contact-box h4 {
+      margin: 0 0 12px;
+      color: #0b4c86;
+    }
+    .contact-box iframe {
+      width: 100%;
+      height: 220px;
+      border: 0;
+      border-radius: 14px;
+      margin: 16px 0 0;
+    }
+  </style>
+</head>
+<body data-cms-page="workshops">
+  <nav>
+    <div class="nav-wrapper">
+      <div class="logo">
+        <a href="index.html">
+          <img src="logo.jpg" alt="Viver Almonda">
+        </a>
+      </div>
+      <div class="menu">
+        <a href="index.html">Inicio</a>
+        <div class="dropdown">
+          <a class="dropdown-btn" href="javascript:void(0)">Atividades Desportivas &#9662;</a>
+          <div class="dropdown-content">
+            <a href="canoagem.html">Canoagem</a>
+            <a href="cross-trail.html">Cross Trail</a>
+          </div>
+        </div>
+        <a href="workshops.html">Workshops</a>
+        <a href="inscricoes.html">Inscrições</a>
+        <a href="administracao.html" data-admin-link hidden>Administração</a>
+        <a href="#" data-login-link>Login</a>
+      </div>
+    </div>
+  </nav>
+  <header>
+    <div class="hero">
+      <div class="hero-left">
+        <h1>Workshops</h1>
+        <p>Explora os workshops do Viver Almonda, com atividades práticas sobre natureza, desporto e bem-estar junto ao rio.</p>
+        <p>As nossas sessões são pensadas para grupos, escolas e famílias que querem aprender mais sobre conservação e viver o Almonda de forma ativa.</p>
+        <a class="cta-button" href="inscricoes.html">Reserve aqui</a>
+      </div>
+      <div class="hero-right">
+        <div class="hero-card">
+          <h2>Aprendizagem e ação</h2>
+          <p>Participa em atividades guiadas que combinam oficinas, rotas ao ar livre e experiências que fortalecem o vínculo com o rio Almonda.</p>
+        </div>
+      </div>
+    </div>
+  </header>
+  <section>
+    <h2 class="section-title">Workshops em destaque</h2>
+    <p class="section-text">Conhece as propostas do Viver Almonda, todas com foco em prática, natureza e comunidade.</p>
+    <div class="card-grid">
+      <div class="card">
+        <h3>Oficinas de Natureza</h3>
+        <p>Aprende sobre o ecossistema do Almonda, identifica espécies locais e participa em atividades sustentáveis.</p>
+      </div>
+      <div class="card">
+        <h3>Bem-estar ao ar livre</h3>
+        <p>Yoga, meditação e práticas de respiração junto ao rio para recarregar corpo e mente.</p>
+      </div>
+      <div class="card">
+        <h3>Educação Ambiental</h3>
+        <p>Abordamos reciclagem, proteção do curso de água e valores do Viver Almonda de forma prática.</p>
+      </div>
+    </div>
+  </section>
+  <section>
+    <h2 class="section-title">Galeria de fotos</h2>
+    <div class="card-grid">
+      <div class="card">
+        <h3>2025</h3>
+        <p>Momentos dos workshops junto ao rio, com atividades de campo e formação prática.</p>
+      </div>
+      <div class="card">
+        <h3>2024</h3>
+        <p>Imagens de participantes a explorar o Almonda e a aprender em grupo com os nossos guias.</p>
+      </div>
+    </div>
+  </section>
+  <section>
+    <h2 class="section-title">Contactos</h2>
+    <div class="contact-grid">
+      <div class="contact-box">
+        <h4>Email</h4>
+        <p>viveralmonda@gmail.com</p>
+      </div>
+      <div class="contact-box">
+        <h4>Onde nos pode encontrar?</h4>
+        <p>Associação Viver Almonda está junto ao rio Almonda, em Torres Novas.</p>
+        <iframe src="https://www.google.com/maps?q=39.495872,-8.575388&z=13&output=embed" allowfullscreen="" loading="lazy"></iframe>
+        <a href="https://maps.google.com/?q=39.495872,-8.575388" target="_blank">Abrir no Google Maps</a>
+      </div>
+    </div>
+  </section>
+  <footer class="footer">
+    <p>© 2025 Viver Almonda</p>
+    <p><a href="https://www.facebook.com/profile.php?id=100009631387664&locale=pt_PT" target="_blank">Facebook</a> · <a href="https://www.instagram.com/viver_almonda" target="_blank">Instagram</a></p>
+  </footer>
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      const dropdownBtn = document.querySelector('.dropdown-btn');
+      const dropdownContent = document.querySelector('.dropdown-content');
+      dropdownBtn.addEventListener('click', function(e) {
+        e.preventDefault();
+        dropdownContent.classList.toggle('active');
+      });
+      document.addEventListener('click', function(e) {
+        if (!e.target.closest('.dropdown')) {
+          dropdownContent.classList.remove('active');
+        }
+      });
+      dropdownContent.querySelectorAll('a').forEach(link => {
+        link.addEventListener('click', function() {
+          dropdownContent.classList.remove('active');
+        });
+      });
+    });
+  </script>
+  <script src="auth.js"></script>
+  <script src="cms.js"></script>
+</body>
+</html>
