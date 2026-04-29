@@ -404,8 +404,213 @@
       color: #64748b !important;
       font-weight: 700;
     }
+
+    .visual-editor-card {
+      margin-bottom: 26px;
+    }
+
+    .editor-toolbar {
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+      gap: 16px;
+      flex-wrap: wrap;
+      margin-top: 22px;
+    }
+
+    .editor-toolbar label,
+    .editor-field label,
+    .editor-item label {
+      display: grid;
+      gap: 7px;
+      color: #0b4c86;
+      font-weight: 800;
+    }
+
+    .editor-toolbar select,
+    .editor-toolbar button,
+    .editor-add-bar button,
+    .block-action,
+    .item-action {
+      border: 0;
+      border-radius: 999px;
+      cursor: pointer;
+      font-weight: 800;
+    }
+
+    .editor-toolbar select {
+      min-width: 220px;
+      padding: 12px 14px;
+      border: 1px solid #cbd5e1;
+      border-radius: 12px;
+      background: white;
+    }
+
+    .editor-save {
+      padding: 13px 18px;
+      background: #0b4c86;
+      color: white;
+    }
+
+    .editor-add-bar {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin: 18px 0 22px;
+    }
+
+    .editor-add-bar button {
+      padding: 10px 14px;
+      background: #ffcc33;
+      color: #0b4c86;
+    }
+
+    .visual-editor-grid {
+      display: grid;
+      grid-template-columns: minmax(320px, 0.9fr) minmax(320px, 1.1fr);
+      gap: 22px;
+      align-items: start;
+    }
+
+    .editor-column h3 {
+      margin: 0 0 12px;
+      color: #0b4c86;
+    }
+
+    .editor-block {
+      border: 1px solid #dbe5f1;
+      border-radius: 16px;
+      background: #f8fbff;
+      padding: 16px;
+      margin-bottom: 14px;
+    }
+
+    .editor-block.dragging {
+      opacity: 0.45;
+    }
+
+    .editor-block-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 14px;
+    }
+
+    .drag-handle {
+      cursor: grab;
+      color: #0b4c86;
+      font-weight: 900;
+    }
+
+    .block-actions {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+    }
+
+    .block-action,
+    .item-action {
+      padding: 8px 10px;
+      background: #e8eef7;
+      color: #0b4c86;
+    }
+
+    .block-action.danger,
+    .item-action.danger {
+      background: #ffe9e9;
+      color: #9b1c1c;
+    }
+
+    .editor-fields {
+      display: grid;
+      gap: 12px;
+    }
+
+    .editor-field input,
+    .editor-field textarea,
+    .editor-item input,
+    .editor-item textarea {
+      width: 100%;
+      box-sizing: border-box;
+      padding: 11px 12px;
+      border: 1px solid #cbd5e1;
+      border-radius: 10px;
+      font: inherit;
+      color: #1d2f4a;
+      background: #ffffff;
+    }
+
+    .editor-field textarea,
+    .editor-item textarea {
+      min-height: 84px;
+      resize: vertical;
+    }
+
+    .editor-check {
+      display: flex !important;
+      grid-template-columns: none !important;
+      align-items: center;
+      gap: 9px !important;
+    }
+
+    .editor-check input {
+      width: 18px;
+      height: 18px;
+      accent-color: #0b4c86;
+    }
+
+    .editor-items {
+      display: grid;
+      gap: 10px;
+      margin-top: 8px;
+    }
+
+    .editor-item {
+      padding: 12px;
+      border: 1px solid #e2e8f0;
+      border-radius: 12px;
+      background: white;
+    }
+
+    .editor-item-actions {
+      display: flex;
+      justify-content: flex-end;
+      margin-top: 8px;
+    }
+
+    .editor-preview {
+      max-height: 760px;
+      overflow: auto;
+      border: 1px solid #dbe5f1;
+      border-radius: 16px;
+      background: #ffffff;
+    }
+
+    .editor-preview .cms-hero {
+      padding: 42px 22px;
+    }
+
+    .editor-preview .cms-section {
+      padding: 36px 22px;
+    }
+
+    .editor-status {
+      min-height: 22px;
+      margin-top: 12px !important;
+      color: #64748b !important;
+      font-weight: 800;
+    }
+
+    @media (max-width: 900px) {
+      .visual-editor-grid {
+        grid-template-columns: 1fr;
+      }
+    }
   </style>
   <link rel="stylesheet" href="auth.css">
+  <link rel="stylesheet" href="cms.css">
   <script>
     document.addEventListener('DOMContentLoaded', function() {
       const dropdownBtn = document.querySelector('.dropdown-btn');
@@ -480,6 +685,47 @@
     <h1 class="page-title">Administra&#231;&#227;o</h1>
     <p class="page-text">Consulta os utilizadores que fizeram login no site e gere a permiss&#227;o de cada conta.</p>
 
+    <div class="admin-card visual-editor-card">
+      <h2>Editor visual do site</h2>
+      <p>Edita textos, imagens, botoes e blocos das paginas principais. Arrasta os blocos para mudar a ordem e guarda para publicar.</p>
+
+      <div class="editor-toolbar">
+        <label>
+          Pagina
+          <select id="editorPageSelect">
+            <option value="home">Pagina inicial</option>
+            <option value="canoagem">Canoagem</option>
+            <option value="crossTrail">Cross Trail</option>
+          </select>
+        </label>
+        <button class="editor-save" type="button" id="saveVisualPage">Guardar pagina</button>
+      </div>
+
+      <div class="editor-add-bar">
+        <button type="button" data-add-block="hero">Hero</button>
+        <button type="button" data-add-block="text">Texto</button>
+        <button type="button" data-add-block="image">Imagem</button>
+        <button type="button" data-add-block="cards">Cartoes</button>
+        <button type="button" data-add-block="gallery">Galeria</button>
+        <button type="button" data-add-block="list">Lista</button>
+        <button type="button" data-add-block="cta">Botao</button>
+        <button type="button" data-add-block="contact">Contactos</button>
+      </div>
+
+      <div class="visual-editor-grid">
+        <div class="editor-column">
+          <h3>Blocos da pagina</h3>
+          <div id="visualBlocks"></div>
+        </div>
+        <div class="editor-column">
+          <h3>Preview</h3>
+          <div class="editor-preview cms-preview" id="visualPreview"></div>
+        </div>
+      </div>
+
+      <p class="editor-status" id="visualEditorStatus"></p>
+    </div>
+
     <div class="admin-card settings-card">
       <h2>Inscri&#231;&#245;es</h2>
       <p>Escolhe que atividades aparecem na p&#225;gina de inscri&#231;&#245;es e cria as datas dispon&#237;veis para cada uma.</p>
@@ -544,6 +790,7 @@
 </main>
 
 <script src="auth.js"></script>
+<script src="cms.js"></script>
 <script>
 const loadingView = document.querySelector("[data-admin-loading]");
 const loginView = document.querySelector("[data-admin-login]");
@@ -553,10 +800,18 @@ const tableBody = document.getElementById("usersTableBody");
 const searchInput = document.getElementById("userSearch");
 const userCount = document.querySelector("[data-user-count]");
 const configStatus = document.querySelector("[data-config-status]");
+const editorPageSelect = document.getElementById("editorPageSelect");
+const visualBlocks = document.getElementById("visualBlocks");
+const visualPreview = document.getElementById("visualPreview");
+const visualEditorStatus = document.getElementById("visualEditorStatus");
+const saveVisualPageButton = document.getElementById("saveVisualPage");
 
 let users = [];
 let unsubscribeUsers = null;
 let unsubscribeConfig = null;
+let visualPageId = "home";
+let visualPage = null;
+let draggedBlockId = null;
 const ACTIVITY_KEYS = ["canoagem", "crossTrail"];
 const DEFAULT_INSCRIPTION_CONFIG = {
   activities: {
@@ -612,6 +867,223 @@ function renderAvatar(user) {
   }
 
   return `<span class="table-avatar">${escapeHtml(getInitial(user))}</span>`;
+}
+
+function setVisualEditorStatus(message) {
+  visualEditorStatus.textContent = message || "";
+}
+
+function createBlock(type) {
+  const block = {
+    id: `block-${Date.now()}-${Math.random().toString(16).slice(2)}`,
+    type,
+    visible: true,
+    title: window.CMS_BLOCK_TYPES[type] || "Novo bloco",
+    text: "",
+    image: "",
+    alt: "",
+    cardTitle: "",
+    cardText: "",
+    buttonText: "",
+    buttonUrl: "",
+    mapUrl: "",
+    items: []
+  };
+
+  if (type === "hero") {
+    block.title = "Novo destaque";
+    block.text = "Texto do destaque";
+    block.buttonText = "Saber mais";
+    block.buttonUrl = "inscricoes.html";
+  }
+
+  if (type === "cta") {
+    block.title = "Novo chamada";
+    block.text = "Texto da chamada.";
+    block.buttonText = "Clique aqui";
+    block.buttonUrl = "inscricoes.html";
+  }
+
+  if (type === "cards") {
+    block.items = [{ title: "Novo cartao", text: "Texto do cartao", image: "" }];
+  }
+
+  if (type === "gallery") {
+    block.items = [{ title: "Imagem", image: "", alt: "" }];
+  }
+
+  if (type === "list") {
+    block.items = [{ text: "Novo item" }];
+  }
+
+  if (type === "contact") {
+    block.items = [{ title: "Contacto", text: "" }];
+  }
+
+  return block;
+}
+
+function findVisualBlock(blockId) {
+  return visualPage?.blocks.find((block) => block.id === blockId);
+}
+
+function fieldHtml(block, label, field, type = "text") {
+  const value = escapeHtml(block[field] || "");
+
+  if (type === "textarea") {
+    return `
+      <div class="editor-field">
+        <label>${label}<textarea data-block-id="${block.id}" data-field="${field}">${value}</textarea></label>
+      </div>
+    `;
+  }
+
+  return `
+    <div class="editor-field">
+      <label>${label}<input type="${type}" value="${value}" data-block-id="${block.id}" data-field="${field}"></label>
+    </div>
+  `;
+}
+
+function itemFieldHtml(block, item, index, label, field, type = "text") {
+  const value = escapeHtml(item[field] || "");
+
+  if (type === "textarea") {
+    return `<label>${label}<textarea data-block-id="${block.id}" data-item-index="${index}" data-item-field="${field}">${value}</textarea></label>`;
+  }
+
+  return `<label>${label}<input type="${type}" value="${value}" data-block-id="${block.id}" data-item-index="${index}" data-item-field="${field}"></label>`;
+}
+
+function renderItemsEditor(block) {
+  const usesItems = ["cards", "gallery", "list", "contact"].includes(block.type);
+
+  if (!usesItems) {
+    return "";
+  }
+
+  const itemHtml = block.items.map((item, index) => {
+    const titleInput = block.type !== "list"
+      ? itemFieldHtml(block, item, index, block.type === "gallery" ? "Legenda" : "Titulo", "title")
+      : "";
+    const imageInput = ["cards", "gallery"].includes(block.type)
+      ? itemFieldHtml(block, item, index, "URL da imagem", "image", "url")
+      : "";
+    const textInput = block.type !== "gallery"
+      ? itemFieldHtml(block, item, index, "Texto", "text", "textarea")
+      : itemFieldHtml(block, item, index, "Texto alternativo", "alt");
+
+    return `
+      <div class="editor-item">
+        ${titleInput}
+        ${imageInput}
+        ${textInput}
+        <div class="editor-item-actions">
+          <button class="item-action danger" type="button" data-remove-item="${block.id}" data-item-index="${index}">Remover item</button>
+        </div>
+      </div>
+    `;
+  }).join("");
+
+  return `
+    <div class="editor-field">
+      <label>Itens</label>
+      <div class="editor-items">${itemHtml}</div>
+      <button class="block-action" type="button" data-add-item="${block.id}">Adicionar item</button>
+    </div>
+  `;
+}
+
+function renderEditorBlock(block, index) {
+  const typeName = window.CMS_BLOCK_TYPES[block.type] || block.type;
+  const mediaFields = ["hero", "image"].includes(block.type)
+    ? fieldHtml(block, "URL da imagem", "image", "url") + fieldHtml(block, "Texto alternativo da imagem", "alt")
+    : "";
+  const heroFields = block.type === "hero"
+    ? fieldHtml(block, "Titulo do cartao lateral", "cardTitle") + fieldHtml(block, "Texto do cartao lateral", "cardText", "textarea")
+    : "";
+  const buttonFields = ["hero", "cta", "contact"].includes(block.type)
+    ? fieldHtml(block, "Texto do botao", "buttonText") + fieldHtml(block, "Link do botao", "buttonUrl", "url")
+    : "";
+  const mapField = block.type === "contact" ? fieldHtml(block, "Mapa incorporado", "mapUrl", "url") : "";
+
+  return `
+    <article class="editor-block" draggable="true" data-editor-block="${block.id}">
+      <div class="editor-block-header">
+        <div>
+          <span class="drag-handle">::</span>
+          <strong>${escapeHtml(typeName)}</strong>
+        </div>
+        <div class="block-actions">
+          <button class="block-action" type="button" data-move-block="${block.id}" data-direction="-1" ${index === 0 ? "disabled" : ""}>Subir</button>
+          <button class="block-action" type="button" data-move-block="${block.id}" data-direction="1" ${index === visualPage.blocks.length - 1 ? "disabled" : ""}>Descer</button>
+          <button class="block-action danger" type="button" data-delete-block="${block.id}">Apagar</button>
+        </div>
+      </div>
+      <div class="editor-fields">
+        <label class="editor-check"><input type="checkbox" data-block-id="${block.id}" data-field="visible" ${block.visible !== false ? "checked" : ""}> Visivel</label>
+        ${fieldHtml(block, "Titulo", "title")}
+        ${fieldHtml(block, "Texto", "text", "textarea")}
+        ${mediaFields}
+        ${heroFields}
+        ${buttonFields}
+        ${mapField}
+        ${renderItemsEditor(block)}
+      </div>
+    </article>
+  `;
+}
+
+function renderVisualEditor() {
+  if (!visualPage) {
+    return;
+  }
+
+  visualBlocks.innerHTML = visualPage.blocks.map(renderEditorBlock).join("");
+  window.renderCmsPage(visualPage, visualPreview);
+}
+
+function renderVisualPreviewOnly() {
+  if (visualPage) {
+    window.renderCmsPage(visualPage, visualPreview);
+  }
+}
+
+async function loadVisualPage(pageId) {
+  visualPageId = pageId;
+  setVisualEditorStatus("A carregar pagina...");
+
+  try {
+    const snapshot = await window.getCmsPageRef(pageId).get();
+    visualPage = window.normalizeCmsPage(pageId, snapshot.exists ? snapshot.data() : null);
+    renderVisualEditor();
+    setVisualEditorStatus(snapshot.exists ? "" : "A mostrar conteudo inicial. Guarda para publicar esta versao.");
+  } catch (error) {
+    console.error("Visual editor load error:", error);
+    visualPage = window.cloneCmsDefaultPage(pageId);
+    renderVisualEditor();
+    setVisualEditorStatus("Nao foi possivel carregar do Firebase. A mostrar conteudo inicial.");
+  }
+}
+
+async function saveVisualPage() {
+  if (!visualPage) {
+    return;
+  }
+
+  setVisualEditorStatus("A guardar pagina...");
+
+  try {
+    await window.getCmsPageRef(visualPageId).set({
+      name: visualPage.name,
+      blocks: visualPage.blocks,
+      updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+    });
+    setVisualEditorStatus("Pagina guardada e publicada.");
+  } catch (error) {
+    console.error("Visual editor save error:", error);
+    setVisualEditorStatus("Nao foi possivel guardar a pagina.");
+  }
 }
 
 function renderUsers() {
@@ -796,6 +1268,10 @@ function handleProfile(profile) {
   setAdminView("panel");
   startUsersListener();
   startConfigListener();
+
+  if (!visualPage) {
+    loadVisualPage(visualPageId);
+  }
 }
 
 document.addEventListener("auth-profile-changed", (event) => {
@@ -803,6 +1279,140 @@ document.addEventListener("auth-profile-changed", (event) => {
 });
 
 searchInput.addEventListener("input", renderUsers);
+
+editorPageSelect.addEventListener("change", () => {
+  loadVisualPage(editorPageSelect.value);
+});
+
+saveVisualPageButton.addEventListener("click", saveVisualPage);
+
+document.querySelectorAll("[data-add-block]").forEach((button) => {
+  button.addEventListener("click", () => {
+    if (!visualPage) {
+      return;
+    }
+
+    visualPage.blocks.push(createBlock(button.dataset.addBlock));
+    renderVisualEditor();
+    setVisualEditorStatus("Bloco adicionado. Guarda a pagina para publicar.");
+  });
+});
+
+visualBlocks.addEventListener("input", (event) => {
+  const field = event.target.dataset.field;
+  const itemField = event.target.dataset.itemField;
+  const block = findVisualBlock(event.target.dataset.blockId);
+
+  if (!block) {
+    return;
+  }
+
+  if (itemField) {
+    const item = block.items[Number(event.target.dataset.itemIndex)];
+    item[itemField] = event.target.value;
+  } else if (field) {
+    block[field] = event.target.value;
+  }
+
+  renderVisualPreviewOnly();
+});
+
+visualBlocks.addEventListener("change", (event) => {
+  const field = event.target.dataset.field;
+  const block = findVisualBlock(event.target.dataset.blockId);
+
+  if (block && field === "visible") {
+    block.visible = event.target.checked;
+    renderVisualPreviewOnly();
+  }
+});
+
+visualBlocks.addEventListener("click", (event) => {
+  const deleteButton = event.target.closest("[data-delete-block]");
+  const moveButton = event.target.closest("[data-move-block]");
+  const addItemButton = event.target.closest("[data-add-item]");
+  const removeItemButton = event.target.closest("[data-remove-item]");
+
+  if (deleteButton) {
+    visualPage.blocks = visualPage.blocks.filter((block) => block.id !== deleteButton.dataset.deleteBlock);
+    renderVisualEditor();
+    return;
+  }
+
+  if (moveButton) {
+    const index = visualPage.blocks.findIndex((block) => block.id === moveButton.dataset.moveBlock);
+    const nextIndex = index + Number(moveButton.dataset.direction);
+
+    if (index >= 0 && nextIndex >= 0 && nextIndex < visualPage.blocks.length) {
+      const [block] = visualPage.blocks.splice(index, 1);
+      visualPage.blocks.splice(nextIndex, 0, block);
+      renderVisualEditor();
+    }
+
+    return;
+  }
+
+  if (addItemButton) {
+    const block = findVisualBlock(addItemButton.dataset.addItem);
+
+    if (block) {
+      block.items.push(block.type === "gallery" ? { title: "Imagem", image: "", alt: "" } : { title: "Novo item", text: "", image: "" });
+      renderVisualEditor();
+    }
+
+    return;
+  }
+
+  if (removeItemButton) {
+    const block = findVisualBlock(removeItemButton.dataset.removeItem);
+
+    if (block) {
+      block.items.splice(Number(removeItemButton.dataset.itemIndex), 1);
+      renderVisualEditor();
+    }
+  }
+});
+
+visualBlocks.addEventListener("dragstart", (event) => {
+  const blockElement = event.target.closest("[data-editor-block]");
+
+  if (!blockElement) {
+    return;
+  }
+
+  draggedBlockId = blockElement.dataset.editorBlock;
+  blockElement.classList.add("dragging");
+  event.dataTransfer.effectAllowed = "move";
+});
+
+visualBlocks.addEventListener("dragend", (event) => {
+  event.target.closest("[data-editor-block]")?.classList.remove("dragging");
+  draggedBlockId = null;
+});
+
+visualBlocks.addEventListener("dragover", (event) => {
+  if (draggedBlockId) {
+    event.preventDefault();
+  }
+});
+
+visualBlocks.addEventListener("drop", (event) => {
+  event.preventDefault();
+  const targetBlock = event.target.closest("[data-editor-block]");
+
+  if (!targetBlock || !draggedBlockId || targetBlock.dataset.editorBlock === draggedBlockId) {
+    return;
+  }
+
+  const fromIndex = visualPage.blocks.findIndex((block) => block.id === draggedBlockId);
+  const toIndex = visualPage.blocks.findIndex((block) => block.id === targetBlock.dataset.editorBlock);
+
+  if (fromIndex >= 0 && toIndex >= 0) {
+    const [block] = visualPage.blocks.splice(fromIndex, 1);
+    visualPage.blocks.splice(toIndex, 0, block);
+    renderVisualEditor();
+  }
+});
 
 document.querySelectorAll("[data-activity-enabled]").forEach((input) => {
   input.addEventListener("change", async () => {
