@@ -19,6 +19,7 @@ body:not(.is-logged-in) a[href="inscricoes.html"] {
 .user-avatar {
   width: 42px;
   height: 42px;
+  margin: 0;
   padding: 0;
   border: 2px solid rgba(255, 255, 255, 0.7);
   border-radius: 50%;
