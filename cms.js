@@ -39,6 +39,28 @@
     }
   ];
 
+  const CANOAGEM_PHOTOS = [
+    {
+      image: "https://assets.zyrosite.com/cdn-cgi/image/format=auto,w=768,h=518,fit=crop/ALp2ZqewowIJrN22/486980423_2539220749742280_8811993337303612321_n-sLivxTR9CSAtVfQa.jpg",
+      alt: "Grupo de participantes com canoas no rio Almonda"
+    },
+    {
+      image: "https://assets.zyrosite.com/cdn-cgi/image/format=auto,w=768,h=519,fit=crop/ALp2ZqewowIJrN22/541381135_18375384493177140_5102646686989986064_n-vzwfVN7Bb6Ls3AV0.jpg",
+      alt: "Canoas no rio Almonda"
+    }
+  ];
+
+  const CROSS_TRAIL_PHOTOS = [
+    {
+      image: "https://assets.zyrosite.com/cdn-cgi/image/format=auto,w=768,h=750,fit=crop/ALp2ZqewowIJrN22/503268673_4277637385826434_3569610117675582819_n-iLlYfpESEHivlZYo.jpg",
+      alt: "Participante de Cross-Trail junto ao rio Almonda"
+    },
+    {
+      image: "https://assets.zyrosite.com/cdn-cgi/image/format=auto,w=768,h=519,fit=crop/ALp2ZqewowIJrN22/44493030_2278020035788189_6385672876506218496_n-lnf1vDp3sBTetfkd.jpg",
+      alt: "Participantes do Cross-Trail"
+    }
+  ];
+
   function cloneSharedContact() {
     return JSON.parse(JSON.stringify(SHARED_CONTACT));
   }
@@ -134,7 +156,7 @@
           type: "hero",
           visible: true,
           title: "Canoagem",
-          text: "Ja imaginaste deslizar calmamente pelas aguas do Almonda, rodeado pela natureza e pelo som tranquilo do rio?\n\nSozinho, com amigos ou em familia, a descida de canoa e o plano perfeito para desligar da rotina.",
+          text: "J\u00e1 imaginaste deslizar calmamente pelas \u00e1guas do Almonda, rodeado pela natureza e pelo som tranquilo do rio?\n\nVem viver uma experi\u00eancia diferente, cheia de aventura e boa energia, com a Viver Almonda. Sozinho, com amigos ou em fam\u00edlia, a descida de canoa \u00e9 o plano perfeito para desligar da rotina e ligar-te ao que realmente importa.\n\nRespira fundo, rema ao teu ritmo e deixa-te levar pela corrente. O rio chama por ti. Vais ignorar? \ud83d\udea3",
           cardTitle: "O melhor do Almonda",
           cardText: "Viver Almonda une desporto, natureza e respeito ambiental num passeio de canoa seguro e emocionante.",
           buttonText: "Reserve aqui",
@@ -147,8 +169,8 @@
           title: "Galeria de fotos",
           text: "",
           items: [
-            { title: "Ano 2026", text: "Aceda as fotos aqui para ver como foi a nossa ultima temporada de canoagem." },
-            { title: "Ano 2025", text: "Descobre as imagens da epoca passada e inspira-te para a tua proxima aventura no rio." }
+            { title: "Ano 2026", text: "Aceda \u00e0s fotos aqui", buttonText: "Aceda \u00e0s fotos aqui", buttonUrl: "#" },
+            { title: "Ano 2025", text: "Aceda \u00e0s fotos aqui", buttonText: "Aceda \u00e0s fotos aqui", buttonUrl: "#" }
           ]
         },
         {
@@ -169,7 +191,7 @@
           type: "hero",
           visible: true,
           title: "Cross-Trail",
-          text: "Sente a energia da natureza e supera-te a cada passo. Vem viver uma experiencia unica no Cross-Trail junto ao rio Almonda.\n\nConnosco, nao e so uma corrida: e uma celebracao do desporto, da comunidade e da beleza natural.",
+          text: "Sente a energia da natureza e supera-te a cada passo! \ud83c\udfc3\u200d\u2642\ufe0f\n\nVem viver uma experi\u00eancia \u00fanica no Cross-Trail junto ao rio Almonda, onde o desafio se encontra com paisagens incr\u00edveis. Connosco, n\u00e3o \u00e9 s\u00f3 uma corrida, \u00e9 uma celebra\u00e7\u00e3o do desporto, da comunidade e da beleza natural da regi\u00e3o.\n\nAceitas o desafio? Inscreve-te e vem fazer parte desta aventura!",
           cardTitle: "Desafio e Natureza",
           cardText: "O Cross-Trail oferece percurso para todos os niveis, sempre com foco em respeito ambiental e boa disposicao.",
           buttonText: "Reserve aqui",
@@ -182,8 +204,8 @@
           title: "Galeria de fotos",
           text: "",
           items: [
-            { title: "Ano 2018", text: "Aceda as fotos aqui e veja a emocao dos corredores na trilha do Almonda." },
-            { title: "Ano 2019", text: "Revive os melhores momentos do Cross-Trail e inspira-te para a proxima prova." }
+            { title: "Ano 2018", text: "Aceda \u00e0s fotos aqui", buttonText: "Aceda \u00e0s fotos aqui", buttonUrl: "#" },
+            { title: "Ano 2019", text: "Aceda \u00e0s fotos aqui", buttonText: "Aceda \u00e0s fotos aqui", buttonUrl: "#" }
           ]
         },
         {
@@ -361,6 +383,76 @@
     `;
   }
 
+  function getCanoagemGalleryButtonText(item) {
+    return item.buttonText || "Aceda \u00e0s fotos aqui";
+  }
+
+  function renderCanoagemPage(page) {
+    const visibleBlocks = page.blocks.filter((block) => block.visible !== false);
+    const hero = visibleBlocks.find((block) => block.type === "hero") || normalizeBlock(DEFAULT_PAGES.canoagem.blocks[0]);
+    const heroText = DEFAULT_PAGES.canoagem.blocks[0].text;
+    const gallery = visibleBlocks.find((block) => block.id === "canoagem-gallery")
+      || visibleBlocks.find((block) => block.type === "cards" && String(block.title || "").toLowerCase().includes("galeria"));
+    const contact = visibleBlocks.find((block) => block.type === "contact");
+    const photos = CANOAGEM_PHOTOS.map((photo) => `
+      <img src="${escapeHtml(photo.image)}" alt="${escapeHtml(photo.alt)}">
+    `).join("");
+    const galleryItems = DEFAULT_PAGES.canoagem.blocks[1].items.map((item) => `
+      <article>
+        <h3>${escapeHtml(item.title)}</h3>
+        <a class="canoe-gallery-link" href="${escapeHtml(item.buttonUrl || item.url || "#")}">${escapeHtml(getCanoagemGalleryButtonText(item))}</a>
+      </article>
+    `).join("");
+
+    return `
+      <section class="cms-canoagem-page">
+        <div class="canoe-photo-row">${photos}</div>
+        <div class="canoe-copy">
+          ${paragraphs(heroText)}
+          ${renderButton({ ...hero, buttonText: hero.buttonText || "Reserve aqui", buttonUrl: hero.buttonUrl || "inscricoes.html" }).replace("cms-button", "canoe-reserve")}
+        </div>
+        <section class="canoe-gallery-years" aria-labelledby="canoe-gallery-title">
+          <h2 id="canoe-gallery-title">${escapeHtml(gallery?.title || "Galeria de fotos")}</h2>
+          ${galleryItems}
+        </section>
+      </section>
+      ${contact ? renderContact(contact) : ""}
+    `;
+  }
+
+  function renderCrossTrailPage(page) {
+    const visibleBlocks = page.blocks.filter((block) => block.visible !== false);
+    const hero = visibleBlocks.find((block) => block.type === "hero") || normalizeBlock(DEFAULT_PAGES.crossTrail.blocks[0]);
+    const heroText = DEFAULT_PAGES.crossTrail.blocks[0].text;
+    const gallery = visibleBlocks.find((block) => block.id === "cross-gallery")
+      || visibleBlocks.find((block) => block.type === "cards" && String(block.title || "").toLowerCase().includes("galeria"));
+    const contact = visibleBlocks.find((block) => block.type === "contact");
+    const photos = CROSS_TRAIL_PHOTOS.map((photo) => `
+      <img src="${escapeHtml(photo.image)}" alt="${escapeHtml(photo.alt)}">
+    `).join("");
+    const galleryItems = DEFAULT_PAGES.crossTrail.blocks[1].items.map((item) => `
+      <article>
+        <h3>${escapeHtml(item.title)}</h3>
+        <a class="canoe-gallery-link" href="${escapeHtml(item.buttonUrl || item.url || "#")}">${escapeHtml(getCanoagemGalleryButtonText(item))}</a>
+      </article>
+    `).join("");
+
+    return `
+      <section class="cms-canoagem-page cms-cross-trail-page">
+        <div class="canoe-photo-row">${photos}</div>
+        <div class="canoe-copy">
+          ${paragraphs(heroText)}
+          ${renderButton({ ...hero, buttonText: hero.buttonText || "Reserve aqui", buttonUrl: hero.buttonUrl || "inscricoes.html" }).replace("cms-button", "canoe-reserve")}
+        </div>
+        <section class="canoe-gallery-years" aria-labelledby="cross-trail-gallery-title">
+          <h2 id="cross-trail-gallery-title">${escapeHtml(gallery?.title || "Galeria de fotos")}</h2>
+          ${galleryItems}
+        </section>
+      </section>
+      ${contact ? renderContact(contact) : ""}
+    `;
+  }
+
   function renderList(block) {
     const items = block.items.map((item) => `<li>${escapeHtml(item.text || item.title)}</li>`).join("");
     const highlights = (block.highlights || []).map((item) => `
@@ -438,6 +530,16 @@
 
   function renderCmsPage(page, container) {
     container.classList.remove("is-loading");
+    if (container.dataset.cmsPage === "canoagem") {
+      container.innerHTML = renderCanoagemPage(page);
+      return;
+    }
+
+    if (container.dataset.cmsPage === "crossTrail") {
+      container.innerHTML = renderCrossTrailPage(page);
+      return;
+    }
+
     container.innerHTML = page.blocks.map((block) => renderBlock(applySharedContact(block))).join("");
   }
 

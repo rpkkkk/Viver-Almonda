@@ -75,12 +75,12 @@
       position: relative;
     }
     @keyframes slideDown {
-      from { 
-        opacity: 0; 
+      from {
+        opacity: 0;
         transform: translateY(-12px);
       }
-      to { 
-        opacity: 1; 
+      to {
+        opacity: 1;
         transform: translateY(0);
       }
     }
@@ -261,21 +261,18 @@
     document.addEventListener('DOMContentLoaded', function() {
       const dropdownBtn = document.querySelector('.dropdown-btn');
       const dropdownContent = document.querySelector('.dropdown-content');
-      
-      // Toggle menu when clicking the button
+
       dropdownBtn.addEventListener('click', function(e) {
         e.preventDefault();
         dropdownContent.classList.toggle('active');
       });
-      
-      // Close menu when clicking outside
+
       document.addEventListener('click', function(e) {
         if (!e.target.closest('.dropdown')) {
           dropdownContent.classList.remove('active');
         }
       });
-      
-      // Close menu when clicking a link in the dropdown
+
       dropdownContent.querySelectorAll('a').forEach(link => {
         link.addEventListener('click', function() {
           dropdownContent.classList.remove('active');
@@ -300,16 +297,16 @@
       <div class="menu">
         <a href="index.html">Inicio</a>
         <div class="dropdown">
-          <a class="dropdown-btn" href="javascript:void(0)">Atividades Desportivas ▾</a>
+          <a class="dropdown-btn" href="javascript:void(0)">Atividades Desportivas &#9662;</a>
           <div class="dropdown-content">
             <a href="canoagem.html">Canoagem</a>
             <a href="cross-trail.html">Cross Trail</a>
           </div>
         </div>
         <a href="workshops.html">Workshops</a>
-        <a href="inscricoes.html">Inscrições</a>
-      <a href="administracao.html" data-admin-link hidden>Administra&#231;&#227;o</a>
-      <a href="#" data-login-link>Login</a>
+        <a href="inscricoes.html">Inscri&#231;&#245;es</a>
+        <a href="administracao.html" data-admin-link hidden>Administra&#231;&#227;o</a>
+        <a href="#" data-login-link>Login</a>
       </div>
     </div>
   </nav>
@@ -317,8 +314,8 @@
     <div class="hero">
       <div>
         <h1>Canoagem</h1>
-        <p>Já imaginaste deslizar calmamente pelas águas do Almonda, rodeado pela natureza e pelo som tranquilo do rio? Vem viver uma experiência diferente, cheia de aventura e boa energia, com a Viver Almonda.</p>
-        <p>Sozinho, com amigos ou em família, a descida de canoa é o plano perfeito para desligar da rotina e ligar-te ao que realmente importa. Respira fundo, rema ao teu ritmo e deixa-te levar pela corrente. O rio chama por ti. Vais ignorar? 🚣‍♂️</p>
+        <p>J&aacute; imaginaste deslizar calmamente pelas &aacute;guas do Almonda, rodeado pela natureza e pelo som tranquilo do rio?</p>
+        <p>Vem viver uma experi&ecirc;ncia diferente, cheia de aventura e boa energia, com a Viver Almonda.</p>
         <a class="button-link" href="inscricoes.html">Reserve aqui</a>
       </div>
       <div class="hero-right">
@@ -332,11 +329,11 @@
     <div class="card-grid">
       <div class="card">
         <h3>Ano 2026</h3>
-        <p>Aceda às fotos aqui para ver como foi a nossa última temporada de canoagem.</p>
+        <p>Aceda &agrave;s fotos aqui.</p>
       </div>
       <div class="card">
         <h3>Ano 2025</h3>
-        <p>Descobre as imagens da época passada e inspira-te para a tua próxima aventura no rio.</p>
+        <p>Aceda &agrave;s fotos aqui.</p>
       </div>
     </div>
   </section>
@@ -349,15 +346,15 @@
       </div>
       <div class="contact-box">
         <h4>Onde nos pode encontrar?</h4>
-        <p>Associação Viver Almonda está junto ao rio Almonda, em Torres Novas.</p>
+        <p>Associa&ccedil;&atilde;o Viver Almonda est&aacute; junto ao rio Almonda, em Torres Novas.</p>
         <iframe src="https://www.google.com/maps?q=39.495872,-8.575388&z=13&output=embed" allowfullscreen="" loading="lazy"></iframe>
         <a href="https://maps.google.com/?q=39.495872,-8.575388" target="_blank">Abrir no Google Maps</a>
       </div>
     </div>
   </section>
   <footer class="footer">
-    <p>© 2025 Viver Almonda</p>
-    <p><a href="https://www.facebook.com/profile.php?id=100009631387664&locale=pt_PT" target="_blank">Facebook</a> · <a href="https://www.instagram.com/viver_almonda" target="_blank">Instagram</a></p>
+    <p>&copy; 2025 Viver Almonda</p>
+    <p><a href="https://www.facebook.com/profile.php?id=100009631387664&locale=pt_PT" target="_blank">Facebook</a> &middot; <a href="https://www.instagram.com/viver_almonda" target="_blank">Instagram</a></p>
   </footer>
 
 <script src="auth.js"></script>

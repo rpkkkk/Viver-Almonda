@@ -288,6 +288,117 @@
   border-radius: 14px;
 }
 
+.cms-page[data-cms-page="canoagem"] {
+  background: #ffffff;
+}
+
+.cms-page[data-cms-page="crossTrail"] {
+  background: #ffffff;
+}
+
+body[data-cms-page="canoagem"] a.canoe-reserve[href="inscricoes.html"],
+body[data-cms-page="canoagem"]:not(.is-logged-in) a.canoe-reserve[href="inscricoes.html"],
+body[data-cms-page="crossTrail"] a.canoe-reserve[href="inscricoes.html"],
+body[data-cms-page="crossTrail"]:not(.is-logged-in) a.canoe-reserve[href="inscricoes.html"] {
+  display: flex !important;
+}
+
+.cms-canoagem-page {
+  width: min(100% - 48px, 680px);
+  margin: 0 auto;
+  padding: 22px 0 0;
+  background: #ffffff;
+  color: #111827;
+}
+
+.canoe-photo-row {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 48px;
+}
+
+.canoe-photo-row img {
+  width: 100%;
+  aspect-ratio: 1.483 / 1;
+  display: block;
+  object-fit: cover;
+}
+
+.canoe-copy {
+  margin-top: 38px;
+  font-size: 19px;
+  line-height: 1.22;
+  color: #111827;
+}
+
+.canoe-copy p {
+  margin: 0 0 7px;
+}
+
+.canoe-reserve {
+  width: 128px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  margin: 8px auto 0;
+  border: 1px solid #111827;
+  border-radius: 999px;
+  background: #ffffff;
+  color: #111827;
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 1;
+  text-decoration: none;
+}
+
+.canoe-gallery-years {
+  display: grid;
+  justify-items: center;
+  padding: 74px 0 0;
+  text-align: center;
+}
+
+.canoe-gallery-years h2 {
+  margin: 0 0 28px;
+  color: #111827;
+  font-size: 28px;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+.canoe-gallery-years article {
+  margin: 0;
+}
+
+.canoe-gallery-years article + article {
+  margin-top: 50px;
+}
+
+.canoe-gallery-years h3 {
+  margin: 0 0 10px;
+  color: #111827;
+  font-size: 19px;
+  font-weight: 400;
+  line-height: 1.4;
+}
+
+.canoe-gallery-link {
+  width: 245px;
+  height: 34px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 7px;
+  background: #9bd8f0;
+  color: #000000;
+  font-size: 10px;
+  font-weight: 700;
+  line-height: 1;
+  text-decoration: none;
+}
+
 @media (max-width: 900px) {
   .cms-hero {
     padding: 60px 18px 38px;
@@ -304,5 +415,35 @@
 
   .cms-home-about-photos {
     grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  }
+}
+
+@media (max-width: 680px) {
+  .cms-canoagem-page {
+    width: min(100% - 32px, 680px);
+  }
+
+  .canoe-photo-row {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+
+  .canoe-copy {
+    margin-top: 28px;
+    font-size: 17px;
+  }
+
+  .canoe-gallery-years {
+    padding-top: 54px;
+  }
+}
+
+@media (max-height: 950px) and (min-width: 900px) {
+  .canoe-gallery-years article + article {
+    margin-top: 4px;
+  }
+
+  .canoe-gallery-years h3 {
+    margin-bottom: 4px;
   }
 }
