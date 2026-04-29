@@ -12,10 +12,14 @@ if (!firebase.apps.length) {
 const auth = firebase.auth();
 const db = firebase.firestore ? firebase.firestore() : null;
 const storage = firebase.storage ? firebase.storage() : null;
+const DEVELOPER_EMAILS = [
+  "rodrigo.pereira6035@gmail.com"
+];
 const SUPERADMIN_EMAILS = [
   "rodrigo.pereira6035@gmail.com"
 ];
 const ADMIN_EMAILS = [];
+const AUTH_PERMISSIONS = ["membro", "admin", "superadmin", "developer"];
 
 window.auth = auth;
 window.db = db;
@@ -30,7 +34,20 @@ function isSuperAdminEmail(email) {
   return SUPERADMIN_EMAILS.includes(String(email || "").trim().toLowerCase());
 }
 
+function isDeveloperEmail(email) {
+  return DEVELOPER_EMAILS.includes(String(email || "").trim().toLowerCase());
+}
+
+function normalizeAuthPermission(permission) {
+  const value = String(permission || "").trim().toLowerCase();
+  return AUTH_PERMISSIONS.includes(value) ? value : "membro";
+}
+
 function getProfilePermission(email, savedPermission) {
+  if (isDeveloperEmail(email)) {
+    return "developer";
+  }
+
   if (isSuperAdminEmail(email)) {
     return "superadmin";
   }
@@ -39,7 +56,7 @@ function getProfilePermission(email, savedPermission) {
     return "admin";
   }
 
-  return savedPermission || "membro";
+  return normalizeAuthPermission(savedPermission);
 }
 
 function buildUserProfile(user, savedProfile) {
@@ -61,16 +78,22 @@ function buildUserProfile(user, savedProfile) {
 }
 
 function isAdminUser(user, profile) {
-  return Boolean(user && (isSuperAdminEmail(user.email) || isAdminEmail(user.email) || ["admin", "superadmin"].includes(profile?.permissao)));
+  return Boolean(user && (isDeveloperEmail(user.email) || isSuperAdminEmail(user.email) || isAdminEmail(user.email) || ["admin", "superadmin", "developer"].includes(normalizeAuthPermission(profile?.permissao))));
 }
 
 function isSuperAdminUser(user, profile) {
-  return Boolean(user && (isSuperAdminEmail(user.email) || profile?.permissao === "superadmin"));
+  return Boolean(user && (isDeveloperEmail(user.email) || isSuperAdminEmail(user.email) || ["superadmin", "developer"].includes(normalizeAuthPermission(profile?.permissao))));
+}
+
+function isDeveloperUser(user, profile) {
+  return Boolean(user && (isDeveloperEmail(user.email) || normalizeAuthPermission(profile?.permissao) === "developer"));
 }
 
 window.isAdminEmail = isAdminEmail;
 window.isSuperAdminEmail = isSuperAdminEmail;
+window.isDeveloperEmail = isDeveloperEmail;
 window.isSuperAdminUser = isSuperAdminUser;
+window.isDeveloperUser = isDeveloperUser;
 
 function login(event) {
   if (event) {
@@ -222,12 +245,14 @@ function ensureUserMenus() {
 function updateAuthUI(user, profile) {
   const isAdmin = isAdminUser(user, profile);
   const isSuperAdmin = isSuperAdminUser(user, profile);
+  const isDeveloper = isDeveloperUser(user, profile);
 
   document.body.classList.add("auth-ready");
   document.body.classList.toggle("is-logged-in", Boolean(user));
   document.body.classList.toggle("is-logged-out", !user);
   document.body.classList.toggle("is-admin", isAdmin);
   document.body.classList.toggle("is-superadmin", isSuperAdmin);
+  document.body.classList.toggle("is-developer", isDeveloper);
 
   document.querySelectorAll("[data-login-link]").forEach((link) => {
     link.hidden = Boolean(user);

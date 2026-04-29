@@ -481,6 +481,17 @@
       margin-bottom: 26px;
     }
 
+    .visual-editor-card.is-readonly .editor-add-bar,
+    .visual-editor-card.is-readonly .block-actions,
+    .visual-editor-card.is-readonly .editor-item-actions,
+    .visual-editor-card.is-readonly .gallery-upload {
+      display: none !important;
+    }
+
+    .visual-editor-card.is-readonly .editor-save {
+      display: none;
+    }
+
     .editor-toolbar {
       display: flex;
       align-items: flex-end;
@@ -575,6 +586,11 @@
       font-weight: 900;
     }
 
+    .visual-editor-card.is-readonly .drag-handle {
+      cursor: default;
+      opacity: 0.55;
+    }
+
     .block-actions {
       display: flex;
       gap: 8px;
@@ -612,6 +628,14 @@
       font: inherit;
       color: #1d2f4a;
       background: #ffffff;
+    }
+
+    .visual-editor-card.is-readonly .editor-field input,
+    .visual-editor-card.is-readonly .editor-field textarea,
+    .visual-editor-card.is-readonly .editor-item input,
+    .visual-editor-card.is-readonly .editor-item textarea {
+      background: #f1f5f9;
+      color: #475569;
     }
 
     .editor-field textarea,
@@ -826,14 +850,14 @@
       <div class="admin-section-list" data-admin-section-list hidden>
         <button class="admin-section-option is-active" type="button" data-admin-section-option="membros">Membros</button>
         <button class="admin-section-option" type="button" data-admin-section-option="inscricoes">Inscri&#231;&#245;es (Datas)</button>
-        <button class="admin-section-option" type="button" data-admin-section-option="editor" data-superadmin-only>Editor visual do site (Beta Teste)</button>
+        <button class="admin-section-option" type="button" data-admin-section-option="editor">Editor visual do site (Beta Teste)</button>
       </div>
     </div>
 
-    <div class="admin-content-section" data-admin-section="editor" data-superadmin-only hidden>
+    <div class="admin-content-section" data-admin-section="editor" hidden>
     <div class="admin-card visual-editor-card">
       <h2>Editor visual do site</h2>
-      <p>Edita textos, imagens, botoes e blocos das paginas principais. Arrasta os blocos para mudar a ordem e guarda para publicar.</p>
+      <p data-editor-intro>Edita textos, imagens, botoes e blocos das paginas principais. Arrasta os blocos para mudar a ordem e guarda para publicar.</p>
 
       <div class="editor-toolbar">
         <label>
@@ -847,7 +871,7 @@
         <button class="editor-save" type="button" id="saveVisualPage">Guardar pagina</button>
       </div>
 
-      <div class="editor-add-bar">
+      <div class="editor-add-bar" data-editor-add-bar>
         <button type="button" data-add-block="hero">Hero</button>
         <button type="button" data-add-block="text">Texto</button>
         <button type="button" data-add-block="image">Imagem</button>
@@ -959,6 +983,9 @@ const visualBlocks = document.getElementById("visualBlocks");
 const visualPreview = document.getElementById("visualPreview");
 const visualEditorStatus = document.getElementById("visualEditorStatus");
 const saveVisualPageButton = document.getElementById("saveVisualPage");
+const visualEditorCard = document.querySelector(".visual-editor-card");
+const visualEditorIntro = document.querySelector("[data-editor-intro]");
+const editorAddBar = document.querySelector("[data-editor-add-bar]");
 const adminSectionToggle = document.querySelector("[data-admin-section-toggle]");
 const adminSectionList = document.querySelector("[data-admin-section-list]");
 const adminSectionLabel = document.querySelector("[data-admin-section-label]");
@@ -971,7 +998,24 @@ let unsubscribeConfig = null;
 let visualPageId = "home";
 let visualPage = null;
 let draggedBlockId = null;
+let currentPermission = "membro";
 let currentIsSuperAdmin = false;
+let currentIsDeveloper = false;
+let currentCanViewVisualEditor = false;
+let currentCanEditVisualEditor = false;
+const PERMISSIONS = ["membro", "admin", "superadmin", "developer"];
+const PERMISSION_LABELS = {
+  membro: "membro",
+  admin: "admin",
+  superadmin: "superadmin",
+  developer: "Developer"
+};
+const PERMISSION_LEVELS = {
+  membro: 0,
+  admin: 1,
+  superadmin: 2,
+  developer: 3
+};
 const ACTIVITY_KEYS = ["canoagem", "crossTrail"];
 const DEFAULT_INSCRIPTION_CONFIG = {
   activities: {
@@ -994,6 +1038,66 @@ const ADMIN_SECTION_LABELS = {
   membros: "Membros"
 };
 
+function normalizePermission(permission) {
+  const value = String(permission || "").trim().toLowerCase();
+  return PERMISSIONS.includes(value) ? value : "membro";
+}
+
+function getPermissionLevel(permission) {
+  return PERMISSION_LEVELS[normalizePermission(permission)] ?? 0;
+}
+
+function getCurrentPermission(profile) {
+  const email = window.auth.currentUser?.email || "";
+  const profilePermission = normalizePermission(profile?.permissao);
+
+  if (window.isDeveloperEmail?.(email) || profilePermission === "developer") {
+    return "developer";
+  }
+
+  if (window.isSuperAdminEmail?.(email) || profilePermission === "superadmin") {
+    return "superadmin";
+  }
+
+  if (window.isAdminEmail?.(email) || profilePermission === "admin") {
+    return "admin";
+  }
+
+  return profilePermission;
+}
+
+function getCurrentMaxAssignableLevel() {
+  if (currentIsDeveloper) {
+    return PERMISSION_LEVELS.developer;
+  }
+
+  if (currentIsSuperAdmin) {
+    return PERMISSION_LEVELS.superadmin;
+  }
+
+  return PERMISSION_LEVELS.admin;
+}
+
+function getAssignablePermissions(user) {
+  const permission = normalizePermission(user.permissao);
+  const maxLevel = getCurrentMaxAssignableLevel();
+
+  if (getPermissionLevel(permission) > maxLevel) {
+    return [permission];
+  }
+
+  return PERMISSIONS.filter((item) => getPermissionLevel(item) <= maxLevel);
+}
+
+function canAssignPermission(user, nextPermission) {
+  if (!user) {
+    return false;
+  }
+
+  const maxLevel = getCurrentMaxAssignableLevel();
+  return getPermissionLevel(user.permissao) <= maxLevel && getPermissionLevel(nextPermission) <= maxLevel;
+}
+
 function closeAdminSectionMenu() {
   adminSectionList.hidden = true;
   adminSectionToggle.setAttribute("aria-expanded", "false");
@@ -1002,7 +1106,7 @@ function closeAdminSectionMenu() {
 function setAdminSection(sectionId) {
   let nextSection = ADMIN_SECTION_LABELS[sectionId] ? sectionId : "membros";
 
-  if (nextSection === "editor" && !currentIsSuperAdmin) {
+  if (nextSection === "editor" && !currentCanViewVisualEditor) {
     nextSection = "membros";
   }
 
@@ -1019,11 +1123,36 @@ function setAdminSection(sectionId) {
 }
 
 function updateAdminSectionAccess() {
-  document.querySelectorAll("[data-superadmin-only]").forEach((element) => {
-    element.hidden = !currentIsSuperAdmin;
-  });
+  const isReadOnly = !currentCanEditVisualEditor;
 
-  if (!currentIsSuperAdmin && !document.querySelector('[data-admin-section="editor"]')?.hidden) {
+  visualEditorCard?.classList.toggle("is-readonly", isReadOnly);
+  if (visualEditorIntro) {
+    visualEditorIntro.textContent = isReadOnly
+      ? "Consulta textos, imagens, botoes e blocos das paginas principais. Esta permissao nao permite editar o conteudo inserido."
+      : "Edita textos, imagens, botoes e blocos das paginas principais. Arrasta os blocos para mudar a ordem e guarda para publicar.";
+  }
+  if (saveVisualPageButton) {
+    saveVisualPageButton.hidden = isReadOnly;
+    saveVisualPageButton.disabled = isReadOnly;
+  }
+  if (editorAddBar) {
+    editorAddBar.hidden = isReadOnly;
+  }
+  visualBlocks?.querySelectorAll("input, textarea").forEach((control) => {
+    if (control.matches('input[type="checkbox"], input[type="file"]')) {
+      control.disabled = isReadOnly;
+      return;
+    }
+
+    control.readOnly = isReadOnly;
+  });
+  if (isReadOnly) {
+    visualBlocks?.querySelectorAll("button").forEach((button) => {
+      button.disabled = true;
+    });
+  }
+
+  if (!currentCanViewVisualEditor && !document.querySelector('[data-admin-section="editor"]')?.hidden) {
     setAdminSection("membros");
   }
 }
@@ -1181,8 +1310,8 @@ function uploadFileWithProgress(ref, file, metadata, onProgress) {
 }
 
 async function uploadGalleryFiles(blockId, fileList) {
-  if (!currentIsSuperAdmin) {
-    setGalleryUploadStatus(blockId, "Apenas superadmin pode carregar fotos no editor visual.", true);
+  if (!currentCanEditVisualEditor) {
+    setGalleryUploadStatus(blockId, "Apenas superadmin ou Developer pode carregar fotos no editor visual.", true);
     return;
   }
 
@@ -1317,30 +1446,32 @@ function findVisualBlock(blockId) {
 
 function fieldHtml(block, label, field, type = "text") {
   const value = escapeHtml(block[field] || "");
+  const readonly = currentCanEditVisualEditor ? "" : " readonly";
 
   if (type === "textarea") {
     return `
       <div class="editor-field">
-        <label>${label}<textarea data-block-id="${block.id}" data-field="${field}">${value}</textarea></label>
+        <label>${label}<textarea data-block-id="${block.id}" data-field="${field}"${readonly}>${value}</textarea></label>
       </div>
     `;
   }
 
   return `
     <div class="editor-field">
-      <label>${label}<input type="${type}" value="${value}" data-block-id="${block.id}" data-field="${field}"></label>
+      <label>${label}<input type="${type}" value="${value}" data-block-id="${block.id}" data-field="${field}"${readonly}></label>
     </div>
   `;
 }
 
 function itemFieldHtml(block, item, index, label, field, type = "text") {
   const value = escapeHtml(item[field] || "");
+  const readonly = currentCanEditVisualEditor ? "" : " readonly";
 
   if (type === "textarea") {
-    return `<label>${label}<textarea data-block-id="${block.id}" data-item-index="${index}" data-item-field="${field}">${value}</textarea></label>`;
+    return `<label>${label}<textarea data-block-id="${block.id}" data-item-index="${index}" data-item-field="${field}"${readonly}>${value}</textarea></label>`;
   }
 
-  return `<label>${label}<input type="${type}" value="${value}" data-block-id="${block.id}" data-item-index="${index}" data-item-field="${field}"></label>`;
+  return `<label>${label}<input type="${type}" value="${value}" data-block-id="${block.id}" data-item-index="${index}" data-item-field="${field}"${readonly}></label>`;
 }
 
 function itemPreviewHtml(item) {
@@ -1360,7 +1491,7 @@ function canUploadImages(block) {
 }
 
 function uploadBoxHtml(block) {
-  if (!canUploadImages(block)) {
+  if (!currentCanEditVisualEditor || !canUploadImages(block)) {
     return "";
   }
 
@@ -1396,25 +1527,34 @@ function renderItemsEditor(block) {
       ? itemFieldHtml(block, item, index, "Texto", "text", "textarea")
       : itemFieldHtml(block, item, index, "Texto alternativo", "alt");
 
+    const itemActions = currentCanEditVisualEditor
+      ? `
+        <div class="editor-item-actions">
+          <button class="item-action danger" type="button" data-remove-item="${block.id}" data-item-index="${index}">Remover item</button>
+        </div>
+      `
+      : "";
+
     return `
       <div class="editor-item">
         ${itemPreviewHtml(item)}
         ${titleInput}
         ${imageInput}
         ${textInput}
-        <div class="editor-item-actions">
-          <button class="item-action danger" type="button" data-remove-item="${block.id}" data-item-index="${index}">Remover item</button>
-        </div>
+        ${itemActions}
       </div>
     `;
   }).join("");
+  const addItemButton = currentCanEditVisualEditor
+    ? `<button class="block-action" type="button" data-add-item="${block.id}">${canUploadImages(block) ? "Adicionar item por URL" : "Adicionar item"}</button>`
+    : "";
 
   return `
     <div class="editor-field">
       <label>Itens</label>
       ${uploadBoxHtml(block)}
       <div class="editor-items">${itemHtml}</div>
-      <button class="block-action" type="button" data-add-item="${block.id}">${canUploadImages(block) ? "Adicionar item por URL" : "Adicionar item"}</button>
+      ${addItemButton}
     </div>
   `;
 }
@@ -1431,22 +1571,28 @@ function renderEditorBlock(block, index) {
     ? fieldHtml(block, "Texto do botao", "buttonText") + fieldHtml(block, "Link do botao", "buttonUrl", "url")
     : "";
   const mapField = block.type === "contact" ? fieldHtml(block, "Mapa incorporado", "mapUrl", "url") : "";
-
-  return `
-    <article class="editor-block" draggable="true" data-editor-block="${block.id}">
-      <div class="editor-block-header">
-        <div>
-          <span class="drag-handle">::</span>
-          <strong>${escapeHtml(typeName)}</strong>
-        </div>
+  const blockActions = currentCanEditVisualEditor
+    ? `
         <div class="block-actions">
           <button class="block-action" type="button" data-move-block="${block.id}" data-direction="-1" ${index === 0 ? "disabled" : ""}>Subir</button>
           <button class="block-action" type="button" data-move-block="${block.id}" data-direction="1" ${index === visualPage.blocks.length - 1 ? "disabled" : ""}>Descer</button>
           <button class="block-action danger" type="button" data-delete-block="${block.id}">Apagar</button>
         </div>
+      `
+    : "";
+  const visibleDisabled = currentCanEditVisualEditor ? "" : " disabled";
+
+  return `
+    <article class="editor-block" draggable="${currentCanEditVisualEditor ? "true" : "false"}" data-editor-block="${block.id}">
+      <div class="editor-block-header">
+        <div>
+          <span class="drag-handle">::</span>
+          <strong>${escapeHtml(typeName)}</strong>
+        </div>
+        ${blockActions}
       </div>
       <div class="editor-fields">
-        <label class="editor-check"><input type="checkbox" data-block-id="${block.id}" data-field="visible" ${block.visible !== false ? "checked" : ""}> Visivel</label>
+        <label class="editor-check"><input type="checkbox" data-block-id="${block.id}" data-field="visible" ${block.visible !== false ? "checked" : ""}${visibleDisabled}> Visivel</label>
         ${fieldHtml(block, "Titulo", "title")}
         ${fieldHtml(block, "Texto", "text", "textarea")}
         ${mediaFields}
@@ -1466,6 +1612,7 @@ function renderVisualEditor() {
 
   visualBlocks.innerHTML = visualPage.blocks.map(renderEditorBlock).join("");
   window.renderCmsPage(visualPage, visualPreview);
+  updateAdminSectionAccess();
 }
 
 function renderVisualPreviewOnly() {
@@ -1475,7 +1622,7 @@ function renderVisualPreviewOnly() {
 }
 
 async function loadVisualPage(pageId) {
-  if (!currentIsSuperAdmin) {
+  if (!currentCanViewVisualEditor) {
     return;
   }
 
@@ -1486,18 +1633,24 @@ async function loadVisualPage(pageId) {
     const snapshot = await window.getCmsPageRef(pageId).get();
     visualPage = window.normalizeCmsPage(pageId, snapshot.exists ? snapshot.data() : null);
     renderVisualEditor();
-    setVisualEditorStatus(snapshot.exists ? "" : "A mostrar conteudo inicial. Guarda para publicar esta versao.");
+    if (!currentCanEditVisualEditor) {
+      setVisualEditorStatus("Modo de consulta: podes ver o editor visual, mas apenas superadmin ou Developer pode editar.");
+    } else {
+      setVisualEditorStatus(snapshot.exists ? "" : "A mostrar conteudo inicial. Guarda para publicar esta versao.");
+    }
   } catch (error) {
     console.error("Visual editor load error:", error);
     visualPage = window.cloneCmsDefaultPage(pageId);
     renderVisualEditor();
-    setVisualEditorStatus("Nao foi possivel carregar do Firebase. A mostrar conteudo inicial.");
+    setVisualEditorStatus(currentCanEditVisualEditor
+      ? "Nao foi possivel carregar do Firebase. A mostrar conteudo inicial."
+      : "Nao foi possivel carregar do Firebase. A mostrar conteudo inicial em modo de consulta.");
   }
 }
 
 async function saveVisualPage(successMessage = "Pagina guardada e publicada.") {
-  if (!currentIsSuperAdmin) {
-    setVisualEditorStatus("Apenas superadmin pode guardar o editor visual.");
+  if (!currentCanEditVisualEditor) {
+    setVisualEditorStatus("Apenas superadmin ou Developer pode guardar o editor visual.");
     return;
   }
 
@@ -1535,7 +1688,12 @@ function renderUsers() {
     return;
   }
 
-  tableBody.innerHTML = filteredUsers.map((user) => `
+  tableBody.innerHTML = filteredUsers.map((user) => {
+    const permission = normalizePermission(user.permissao);
+    const canEditPermission = getPermissionLevel(permission) <= getCurrentMaxAssignableLevel();
+    const permissionOptions = getAssignablePermissions(user);
+
+    return `
     <tr>
       <td>
         <div class="user-cell">
@@ -1548,13 +1706,14 @@ function renderUsers() {
       </td>
       <td>${escapeHtml(user.email || "-")}</td>
       <td>
-        <select data-user-id="${escapeHtml(user.uid)}" data-permission-select ${!currentIsSuperAdmin && user.permissao === "superadmin" ? "disabled" : ""}>
-          ${(currentIsSuperAdmin ? ["membro", "admin", "superadmin"] : (user.permissao === "superadmin" ? ["superadmin"] : ["membro", "admin"])).map((permission) => `<option value="${permission}" ${user.permissao === permission ? "selected" : ""}>${permission}</option>`).join("")}
+        <select data-user-id="${escapeHtml(user.uid)}" data-permission-select ${canEditPermission ? "" : "disabled"}>
+          ${permissionOptions.map((option) => `<option value="${option}" ${permission === option ? "selected" : ""}>${PERMISSION_LABELS[option]}</option>`).join("")}
         </select>
       </td>
       <td>${formatDate(user.lastLoginAt)}</td>
     </tr>
-  `).join("");
+    `;
+  }).join("");
 }
 
 function startUsersListener() {
@@ -1683,7 +1842,11 @@ function stopConfigListener() {
 
 function handleProfile(profile) {
   if (!window.auth.currentUser) {
+    currentPermission = "membro";
     currentIsSuperAdmin = false;
+    currentIsDeveloper = false;
+    currentCanViewVisualEditor = false;
+    currentCanEditVisualEditor = false;
     updateAdminSectionAccess();
     stopUsersListener();
     stopConfigListener();
@@ -1691,11 +1854,19 @@ function handleProfile(profile) {
     return;
   }
 
-  currentIsSuperAdmin = profile?.permissao === "superadmin" || window.isSuperAdminEmail?.(window.auth.currentUser.email);
-  const isAdmin = currentIsSuperAdmin || profile?.permissao === "admin" || window.isAdminEmail?.(window.auth.currentUser.email);
+  currentPermission = getCurrentPermission(profile);
+  currentIsDeveloper = currentPermission === "developer";
+  currentIsSuperAdmin = getPermissionLevel(currentPermission) >= PERMISSION_LEVELS.superadmin;
+  currentCanViewVisualEditor = getPermissionLevel(currentPermission) >= PERMISSION_LEVELS.admin;
+  currentCanEditVisualEditor = currentIsSuperAdmin;
+  const isAdmin = getPermissionLevel(currentPermission) >= PERMISSION_LEVELS.admin;
 
   if (!isAdmin) {
+    currentPermission = "membro";
     currentIsSuperAdmin = false;
+    currentIsDeveloper = false;
+    currentCanViewVisualEditor = false;
+    currentCanEditVisualEditor = false;
     updateAdminSectionAccess();
     stopUsersListener();
     stopConfigListener();
@@ -1709,8 +1880,12 @@ function handleProfile(profile) {
   startUsersListener();
   startConfigListener();
 
-  if (currentIsSuperAdmin && !visualPage) {
-    loadVisualPage(visualPageId);
+  if (currentCanViewVisualEditor) {
+    if (visualPage) {
+      renderVisualEditor();
+    } else {
+      loadVisualPage(visualPageId);
+    }
   }
 }
 
@@ -1749,6 +1924,11 @@ saveVisualPageButton.addEventListener("click", () => saveVisualPage());
 
 document.querySelectorAll("[data-add-block]").forEach((button) => {
   button.addEventListener("click", () => {
+    if (!currentCanEditVisualEditor) {
+      setVisualEditorStatus("Apenas superadmin ou Developer pode alterar o editor visual.");
+      return;
+    }
+
     if (!visualPage) {
       return;
     }
@@ -1760,6 +1940,10 @@ document.querySelectorAll("[data-add-block]").forEach((button) => {
 });
 
 visualBlocks.addEventListener("input", (event) => {
+  if (!currentCanEditVisualEditor) {
+    return;
+  }
+
   const field = event.target.dataset.field;
   const itemField = event.target.dataset.itemField;
   const block = findVisualBlock(event.target.dataset.blockId);
@@ -1779,6 +1963,10 @@ visualBlocks.addEventListener("input", (event) => {
 });
 
 visualBlocks.addEventListener("change", (event) => {
+  if (!currentCanEditVisualEditor) {
+    return;
+  }
+
   const field = event.target.dataset.field;
   const block = findVisualBlock(event.target.dataset.blockId);
 
@@ -1789,6 +1977,10 @@ visualBlocks.addEventListener("change", (event) => {
 });
 
 visualBlocks.addEventListener("change", async (event) => {
+  if (!currentCanEditVisualEditor) {
+    return;
+  }
+
   const input = event.target.closest("[data-gallery-file-input]");
 
   if (!input) {
@@ -1800,6 +1992,10 @@ visualBlocks.addEventListener("change", async (event) => {
 });
 
 visualBlocks.addEventListener("dragenter", (event) => {
+  if (!currentCanEditVisualEditor) {
+    return;
+  }
+
   const uploadArea = event.target.closest("[data-gallery-upload]");
 
   if (!uploadArea || !isFileDrag(event)) {
@@ -1811,6 +2007,10 @@ visualBlocks.addEventListener("dragenter", (event) => {
 });
 
 visualBlocks.addEventListener("dragover", (event) => {
+  if (!currentCanEditVisualEditor) {
+    return;
+  }
+
   const uploadArea = event.target.closest("[data-gallery-upload]");
 
   if (!uploadArea || !isFileDrag(event)) {
@@ -1823,6 +2023,10 @@ visualBlocks.addEventListener("dragover", (event) => {
 });
 
 visualBlocks.addEventListener("dragleave", (event) => {
+  if (!currentCanEditVisualEditor) {
+    return;
+  }
+
   const uploadArea = event.target.closest("[data-gallery-upload]");
 
   if (uploadArea && !uploadArea.contains(event.relatedTarget)) {
@@ -1831,6 +2035,10 @@ visualBlocks.addEventListener("dragleave", (event) => {
 });
 
 visualBlocks.addEventListener("drop", async (event) => {
+  if (!currentCanEditVisualEditor) {
+    return;
+  }
+
   const uploadArea = event.target.closest("[data-gallery-upload]");
 
   if (!uploadArea) {
@@ -1843,6 +2051,10 @@ visualBlocks.addEventListener("drop", async (event) => {
 });
 
 visualBlocks.addEventListener("click", (event) => {
+  if (!currentCanEditVisualEditor) {
+    return;
+  }
+
   const deleteButton = event.target.closest("[data-delete-block]");
   const moveButton = event.target.closest("[data-move-block]");
   const addItemButton = event.target.closest("[data-add-item]");
@@ -1889,6 +2101,10 @@ visualBlocks.addEventListener("click", (event) => {
 });
 
 visualBlocks.addEventListener("dragstart", (event) => {
+  if (!currentCanEditVisualEditor) {
+    return;
+  }
+
   const blockElement = event.target.closest("[data-editor-block]");
 
   if (!blockElement) {
@@ -1901,17 +2117,29 @@ visualBlocks.addEventListener("dragstart", (event) => {
 });
 
 visualBlocks.addEventListener("dragend", (event) => {
+  if (!currentCanEditVisualEditor) {
+    return;
+  }
+
   event.target.closest("[data-editor-block]")?.classList.remove("dragging");
   draggedBlockId = null;
 });
 
 visualBlocks.addEventListener("dragover", (event) => {
+  if (!currentCanEditVisualEditor) {
+    return;
+  }
+
   if (draggedBlockId) {
     event.preventDefault();
   }
 });
 
 visualBlocks.addEventListener("drop", (event) => {
+  if (!currentCanEditVisualEditor) {
+    return;
+  }
+
   event.preventDefault();
   const targetBlock = event.target.closest("[data-editor-block]");
 
@@ -1980,8 +2208,10 @@ tableBody.addEventListener("change", async (event) => {
     return;
   }
 
-  if (select.value === "superadmin" && !currentIsSuperAdmin) {
-    alert("Apenas superadmin pode atribuir permissao de superadmin.");
+  const targetUser = users.find((user) => user.uid === select.dataset.userId);
+
+  if (!canAssignPermission(targetUser, select.value)) {
+    alert("Nao tens permissao para atribuir ou alterar essa permissao.");
     renderUsers();
     return;
   }
