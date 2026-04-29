@@ -820,17 +820,17 @@
 
     <div class="admin-section-menu">
       <button class="admin-section-button" type="button" data-admin-section-toggle aria-expanded="false">
-        <span data-admin-section-label>Editor visual do site (Beta Teste)</span>
+        <span data-admin-section-label>Membros</span>
         <span aria-hidden="true">&#9662;</span>
       </button>
       <div class="admin-section-list" data-admin-section-list hidden>
-        <button class="admin-section-option is-active" type="button" data-admin-section-option="editor">Editor visual do site (Beta Teste)</button>
-        <button class="admin-section-option" type="button" data-admin-section-option="inscricoes">Inscri&#231;&#245;es</button>
-        <button class="admin-section-option" type="button" data-admin-section-option="membros">Membros</button>
+        <button class="admin-section-option is-active" type="button" data-admin-section-option="membros">Membros</button>
+        <button class="admin-section-option" type="button" data-admin-section-option="inscricoes">Inscri&#231;&#245;es (Datas)</button>
+        <button class="admin-section-option" type="button" data-admin-section-option="editor" data-superadmin-only>Editor visual do site (Beta Teste)</button>
       </div>
     </div>
 
-    <div class="admin-content-section" data-admin-section="editor">
+    <div class="admin-content-section" data-admin-section="editor" data-superadmin-only hidden>
     <div class="admin-card visual-editor-card">
       <h2>Editor visual do site</h2>
       <p>Edita textos, imagens, botoes e blocos das paginas principais. Arrasta os blocos para mudar a ordem e guarda para publicar.</p>
@@ -875,7 +875,7 @@
 
     <div class="admin-content-section" data-admin-section="inscricoes" hidden>
     <div class="admin-card settings-card">
-      <h2>Inscri&#231;&#245;es</h2>
+      <h2>Inscri&#231;&#245;es (Datas)</h2>
       <p>Escolhe que atividades aparecem na p&#225;gina de inscri&#231;&#245;es e cria as datas dispon&#237;veis para cada uma.</p>
 
       <div class="activity-grid">
@@ -908,7 +908,7 @@
     </div>
     </div>
 
-    <div class="admin-content-section" data-admin-section="membros" hidden>
+    <div class="admin-content-section" data-admin-section="membros">
     <div class="admin-card">
       <h2>Membros</h2>
       <p>Consulta os utilizadores que fizeram login no site e gere a permiss&#227;o de cada conta.</p>
@@ -971,6 +971,7 @@ let unsubscribeConfig = null;
 let visualPageId = "home";
 let visualPage = null;
 let draggedBlockId = null;
+let currentIsSuperAdmin = false;
 const ACTIVITY_KEYS = ["canoagem", "crossTrail"];
 const DEFAULT_INSCRIPTION_CONFIG = {
   activities: {
@@ -989,7 +990,7 @@ const DEFAULT_INSCRIPTION_CONFIG = {
 let inscriptionConfig = cloneDefaultConfig();
 const ADMIN_SECTION_LABELS = {
   editor: "Editor visual do site (Beta Teste)",
-  inscricoes: "Inscri\u00e7\u00f5es",
+  inscricoes: "Inscri\u00e7\u00f5es (Datas)",
   membros: "Membros"
 };
 
@@ -999,7 +1000,11 @@ function closeAdminSectionMenu() {
 }
 
 function setAdminSection(sectionId) {
-  const nextSection = ADMIN_SECTION_LABELS[sectionId] ? sectionId : "editor";
+  let nextSection = ADMIN_SECTION_LABELS[sectionId] ? sectionId : "membros";
+
+  if (nextSection === "editor" && !currentIsSuperAdmin) {
+    nextSection = "membros";
+  }
 
   adminSectionPanels.forEach((panel) => {
     panel.hidden = panel.dataset.adminSection !== nextSection;
@@ -1011,6 +1016,16 @@ function setAdminSection(sectionId) {
 
   adminSectionLabel.textContent = ADMIN_SECTION_LABELS[nextSection];
   closeAdminSectionMenu();
+}
+
+function updateAdminSectionAccess() {
+  document.querySelectorAll("[data-superadmin-only]").forEach((element) => {
+    element.hidden = !currentIsSuperAdmin;
+  });
+
+  if (!currentIsSuperAdmin && !document.querySelector('[data-admin-section="editor"]')?.hidden) {
+    setAdminSection("membros");
+  }
 }
 
 function setAdminView(viewName) {
@@ -1166,6 +1181,11 @@ function uploadFileWithProgress(ref, file, metadata, onProgress) {
 }
 
 async function uploadGalleryFiles(blockId, fileList) {
+  if (!currentIsSuperAdmin) {
+    setGalleryUploadStatus(blockId, "Apenas superadmin pode carregar fotos no editor visual.", true);
+    return;
+  }
+
   const block = findVisualBlock(blockId);
 
   if (!block || !canUploadImages(block)) {
@@ -1455,6 +1475,10 @@ function renderVisualPreviewOnly() {
 }
 
 async function loadVisualPage(pageId) {
+  if (!currentIsSuperAdmin) {
+    return;
+  }
+
   visualPageId = pageId;
   setVisualEditorStatus("A carregar pagina...");
 
@@ -1472,6 +1496,11 @@ async function loadVisualPage(pageId) {
 }
 
 async function saveVisualPage(successMessage = "Pagina guardada e publicada.") {
+  if (!currentIsSuperAdmin) {
+    setVisualEditorStatus("Apenas superadmin pode guardar o editor visual.");
+    return;
+  }
+
   if (!visualPage) {
     return;
   }
@@ -1519,9 +1548,8 @@ function renderUsers() {
       </td>
       <td>${escapeHtml(user.email || "-")}</td>
       <td>
-        <select data-user-id="${escapeHtml(user.uid)}" data-permission-select>
-          <option value="membro" ${user.permissao === "membro" ? "selected" : ""}>membro</option>
-          <option value="admin" ${user.permissao === "admin" ? "selected" : ""}>admin</option>
+        <select data-user-id="${escapeHtml(user.uid)}" data-permission-select ${!currentIsSuperAdmin && user.permissao === "superadmin" ? "disabled" : ""}>
+          ${(currentIsSuperAdmin ? ["membro", "admin", "superadmin"] : (user.permissao === "superadmin" ? ["superadmin"] : ["membro", "admin"])).map((permission) => `<option value="${permission}" ${user.permissao === permission ? "selected" : ""}>${permission}</option>`).join("")}
         </select>
       </td>
       <td>${formatDate(user.lastLoginAt)}</td>
@@ -1655,15 +1683,20 @@ function stopConfigListener() {
 
 function handleProfile(profile) {
   if (!window.auth.currentUser) {
+    currentIsSuperAdmin = false;
+    updateAdminSectionAccess();
     stopUsersListener();
     stopConfigListener();
     setAdminView("login");
     return;
   }
 
-  const isAdmin = profile?.permissao === "admin" || window.isAdminEmail?.(window.auth.currentUser.email);
+  currentIsSuperAdmin = profile?.permissao === "superadmin" || window.isSuperAdminEmail?.(window.auth.currentUser.email);
+  const isAdmin = currentIsSuperAdmin || profile?.permissao === "admin" || window.isAdminEmail?.(window.auth.currentUser.email);
 
   if (!isAdmin) {
+    currentIsSuperAdmin = false;
+    updateAdminSectionAccess();
     stopUsersListener();
     stopConfigListener();
     setAdminView("denied");
@@ -1671,10 +1704,12 @@ function handleProfile(profile) {
   }
 
   setAdminView("panel");
+  updateAdminSectionAccess();
+  setAdminSection("membros");
   startUsersListener();
   startConfigListener();
 
-  if (!visualPage) {
+  if (currentIsSuperAdmin && !visualPage) {
     loadVisualPage(visualPageId);
   }
 }
@@ -1704,7 +1739,7 @@ document.addEventListener("click", (event) => {
   }
 });
 
-setAdminSection("editor");
+setAdminSection("membros");
 
 editorPageSelect.addEventListener("change", () => {
   loadVisualPage(editorPageSelect.value);
@@ -1942,6 +1977,12 @@ tableBody.addEventListener("change", async (event) => {
   const select = event.target.closest("[data-permission-select]");
 
   if (!select) {
+    return;
+  }
+
+  if (select.value === "superadmin" && !currentIsSuperAdmin) {
+    alert("Apenas superadmin pode atribuir permissao de superadmin.");
+    renderUsers();
     return;
   }
 

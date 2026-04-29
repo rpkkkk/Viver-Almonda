@@ -12,9 +12,10 @@ if (!firebase.apps.length) {
 const auth = firebase.auth();
 const db = firebase.firestore ? firebase.firestore() : null;
 const storage = firebase.storage ? firebase.storage() : null;
-const ADMIN_EMAILS = [
+const SUPERADMIN_EMAILS = [
   "rodrigo.pereira6035@gmail.com"
 ];
+const ADMIN_EMAILS = [];
 
 window.auth = auth;
 window.db = db;
@@ -23,6 +24,22 @@ window.currentUserProfile = null;
 
 function isAdminEmail(email) {
   return ADMIN_EMAILS.includes(String(email || "").trim().toLowerCase());
+}
+
+function isSuperAdminEmail(email) {
+  return SUPERADMIN_EMAILS.includes(String(email || "").trim().toLowerCase());
+}
+
+function getProfilePermission(email, savedPermission) {
+  if (isSuperAdminEmail(email)) {
+    return "superadmin";
+  }
+
+  if (isAdminEmail(email)) {
+    return "admin";
+  }
+
+  return savedPermission || "membro";
 }
 
 function buildUserProfile(user, savedProfile) {
@@ -39,15 +56,21 @@ function buildUserProfile(user, savedProfile) {
     email,
     foto: user.photoURL || "",
     ...profile,
-    permissao: isAdminEmail(email) ? "admin" : profile.permissao || "membro"
+    permissao: getProfilePermission(email, profile.permissao)
   };
 }
 
 function isAdminUser(user, profile) {
-  return Boolean(user && (isAdminEmail(user.email) || profile?.permissao === "admin"));
+  return Boolean(user && (isSuperAdminEmail(user.email) || isAdminEmail(user.email) || ["admin", "superadmin"].includes(profile?.permissao)));
+}
+
+function isSuperAdminUser(user, profile) {
+  return Boolean(user && (isSuperAdminEmail(user.email) || profile?.permissao === "superadmin"));
 }
 
 window.isAdminEmail = isAdminEmail;
+window.isSuperAdminEmail = isSuperAdminEmail;
+window.isSuperAdminUser = isSuperAdminUser;
 
 function login(event) {
   if (event) {
@@ -95,7 +118,7 @@ async function saveUserProfile(user) {
   const userRef = db.collection("users").doc(user.uid);
   const now = firebase.firestore.FieldValue.serverTimestamp();
   const email = user.email || "";
-  const isDefaultAdmin = isAdminEmail(email);
+  const defaultPermission = getProfilePermission(email, null);
   const baseData = {
     uid: user.uid,
     nome: user.displayName || "",
@@ -113,14 +136,14 @@ async function saveUserProfile(user) {
         const existingData = snapshot.data() || {};
         transaction.set(userRef, {
           ...baseData,
-          permissao: isDefaultAdmin ? "admin" : existingData.permissao || "membro"
+          permissao: getProfilePermission(email, existingData.permissao)
         }, { merge: true });
         return;
       }
 
       transaction.set(userRef, {
         ...baseData,
-        permissao: isDefaultAdmin ? "admin" : "membro",
+        permissao: defaultPermission,
         createdAt: now
       });
     });
@@ -198,11 +221,13 @@ function ensureUserMenus() {
 
 function updateAuthUI(user, profile) {
   const isAdmin = isAdminUser(user, profile);
+  const isSuperAdmin = isSuperAdminUser(user, profile);
 
   document.body.classList.add("auth-ready");
   document.body.classList.toggle("is-logged-in", Boolean(user));
   document.body.classList.toggle("is-logged-out", !user);
   document.body.classList.toggle("is-admin", isAdmin);
+  document.body.classList.toggle("is-superadmin", isSuperAdmin);
 
   document.querySelectorAll("[data-login-link]").forEach((link) => {
     link.hidden = Boolean(user);

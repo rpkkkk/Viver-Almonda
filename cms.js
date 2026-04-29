@@ -28,6 +28,17 @@
     ]
   };
 
+  const HOME_ABOUT_PHOTOS = [
+    {
+      image: "https://assets.zyrosite.com/cdn-cgi/image/format=auto,w=768,h=900,fit=crop/ALp2ZqewowIJrN22/site1-N3Ugrgw1kwzy0HHP.jpg",
+      alt: "Canoagem no rio Almonda"
+    },
+    {
+      image: "https://assets.zyrosite.com/cdn-cgi/image/format=auto,w=768,h=889,fit=crop/ALp2ZqewowIJrN22/site6-6DdDB2SzMUmcxA4l.jpg",
+      alt: "Valorizacao e conservacao do rio Almonda"
+    }
+  ];
+
   function cloneSharedContact() {
     return JSON.parse(JSON.stringify(SHARED_CONTACT));
   }
@@ -88,7 +99,7 @@
         {
           id: "home-gallery",
           type: "gallery",
-          visible: true,
+          visible: false,
           title: "Galeria",
           text: "",
           items: [
@@ -315,6 +326,41 @@
     return renderSection(block, `<div class="cms-gallery">${images}</div>`);
   }
 
+  function renderHomeAbout(block) {
+    const text = [];
+    const source = [
+      block.text,
+      ...block.items.map((item) => item.text || item.title),
+      ...((block.highlights || []).map((item) => [item.title, item.text].filter(Boolean).join(", ")))
+    ].filter(Boolean);
+
+    source.forEach((line) => {
+      const normalizedLine = line.toLowerCase().slice(0, 62);
+      const isDuplicate = text.some((savedLine) => savedLine.toLowerCase().startsWith(normalizedLine) || normalizedLine.startsWith(savedLine.toLowerCase().slice(0, 62)));
+
+      if (!isDuplicate) {
+        text.push(line);
+      }
+    });
+
+    const copy = text.map((line) => `<p>${escapeHtml(line)}</p>`).join("");
+    const photos = HOME_ABOUT_PHOTOS.map((photo) => `
+      <img src="${escapeHtml(photo.image)}" alt="${escapeHtml(photo.alt)}">
+    `).join("");
+
+    return `
+      <section class="cms-section cms-home-about">
+        <div class="cms-home-about-grid">
+          <div class="cms-home-about-copy">
+            <h2>${escapeHtml(block.title || "Sobre Nos")}</h2>
+            ${copy}
+          </div>
+          <div class="cms-home-about-photos">${photos}</div>
+        </div>
+      </section>
+    `;
+  }
+
   function renderList(block) {
     const items = block.items.map((item) => `<li>${escapeHtml(item.text || item.title)}</li>`).join("");
     const highlights = (block.highlights || []).map((item) => `
@@ -360,6 +406,14 @@
   function renderBlock(block) {
     if (block.visible === false) {
       return "";
+    }
+
+    if (block.id === "home-gallery") {
+      return "";
+    }
+
+    if (block.id === "home-about") {
+      return renderHomeAbout(block);
     }
 
     switch (block.type) {

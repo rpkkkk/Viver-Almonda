@@ -187,6 +187,44 @@
   line-height: 1.8;
 }
 
+.cms-home-about {
+  width: min(100% - 48px, 980px);
+}
+
+.cms-home-about-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(220px, 300px);
+  gap: 48px;
+  align-items: center;
+}
+
+.cms-home-about-copy h2 {
+  margin: 0 0 26px;
+  color: #0b4c86;
+  font-size: clamp(2rem, 2.5vw, 2.6rem);
+  text-align: left;
+}
+
+.cms-home-about-copy p {
+  margin: 0 0 12px;
+  color: #26364d;
+  line-height: 1.45;
+}
+
+.cms-home-about-photos {
+  display: grid;
+  gap: 24px;
+}
+
+.cms-home-about-photos img {
+  width: 100%;
+  height: 220px;
+  display: block;
+  object-fit: cover;
+  border-radius: 12px;
+  box-shadow: 0 14px 30px rgba(0, 0, 0, 0.08);
+}
+
 .cms-gallery {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(240px, 320px));
@@ -257,5 +295,14 @@
 
   .cms-hero-inner {
     grid-template-columns: 1fr;
+  }
+
+  .cms-home-about-grid {
+    grid-template-columns: 1fr;
+    gap: 28px;
+  }
+
+  .cms-home-about-photos {
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
   }
 }
