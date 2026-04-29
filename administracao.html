@@ -1,0 +1,580 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Administra&#231;&#227;o | Viver Almonda</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      color: #1d2f4a;
+      background: #f7f9fc;
+    }
+
+    nav {
+      position: sticky;
+      top: 0;
+      width: 100%;
+      background: #0b4c86;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.18);
+      z-index: 10;
+    }
+
+    .nav-wrapper {
+      max-width: 1180px;
+      margin: 0 auto;
+      padding: 16px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 20px;
+    }
+
+    .logo {
+      height: 50px;
+      display: flex;
+      align-items: center;
+      cursor: pointer;
+    }
+
+    .logo a {
+      display: flex;
+      align-items: center;
+      text-decoration: none;
+      transition: opacity 0.2s ease;
+    }
+
+    .logo a:hover {
+      opacity: 0.8;
+    }
+
+    .logo img {
+      height: 100%;
+      width: auto;
+      max-width: 200px;
+      border-radius: 12px;
+    }
+
+    .menu {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .menu a,
+    .dropdown-btn {
+      color: white;
+      text-decoration: none;
+      font-weight: 600;
+      padding: 10px 14px;
+      border-radius: 12px;
+      transition: background 0.2s ease, transform 0.2s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .menu a:hover,
+    .dropdown:hover > .dropdown-btn {
+      background: rgba(255, 255, 255, 0.16);
+      transform: translateY(-1px);
+    }
+
+    .dropdown {
+      position: relative;
+    }
+
+    .dropdown-content {
+      position: absolute;
+      top: 100%;
+      left: 0;
+      right: auto;
+      display: none;
+      min-width: 220px;
+      background: #175a9f;
+      border-radius: 14px;
+      box-shadow: 0 18px 40px rgba(0, 0, 0, 0.22);
+      overflow: hidden;
+      z-index: 20;
+      margin-top: 6px;
+    }
+
+    .dropdown-content.active {
+      display: block;
+      animation: slideDown 0.3s ease forwards;
+    }
+
+    .dropdown-content a {
+      display: block;
+      padding: 14px 16px;
+      color: white;
+      text-decoration: none;
+      font-weight: 600;
+    }
+
+    .dropdown-content a:hover {
+      background: rgba(255, 255, 255, 0.12);
+    }
+
+    @keyframes slideDown {
+      from {
+        opacity: 0;
+        transform: translateY(-12px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    main {
+      max-width: 1180px;
+      margin: 0 auto;
+      padding: 44px 24px 70px;
+    }
+
+    .page-title {
+      margin: 0 0 10px;
+      color: #0b4c86;
+      font-size: clamp(2rem, 3vw, 3rem);
+    }
+
+    .page-text {
+      margin: 0 0 28px;
+      color: #475569;
+      line-height: 1.7;
+    }
+
+    .admin-card,
+    .admin-gate {
+      background: white;
+      border-radius: 20px;
+      padding: 26px;
+      box-shadow: 0 15px 30px rgba(0, 0, 0, 0.08);
+    }
+
+    .admin-gate {
+      max-width: 760px;
+      text-align: center;
+      margin: 40px auto;
+    }
+
+    .admin-gate h2 {
+      margin: 0;
+      color: #0b4c86;
+    }
+
+    .admin-gate p {
+      margin: 12px 0 0;
+      color: #475569;
+      line-height: 1.7;
+    }
+
+    .admin-gate button {
+      margin-top: 18px;
+      padding: 13px 20px;
+      border: 0;
+      border-radius: 999px;
+      background: #ffcc33;
+      color: #0b4c86;
+      font-weight: 800;
+      cursor: pointer;
+    }
+
+    .admin-toolbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 18px;
+      margin-bottom: 22px;
+      flex-wrap: wrap;
+    }
+
+    .search-box {
+      flex: 1 1 280px;
+      max-width: 460px;
+    }
+
+    .search-box label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: 700;
+      color: #0b4c86;
+    }
+
+    .search-box input {
+      width: 100%;
+      box-sizing: border-box;
+      padding: 13px 14px;
+      border: 1px solid #cbd5e1;
+      border-radius: 12px;
+      font-size: 1rem;
+    }
+
+    .user-count {
+      color: #64748b;
+      font-weight: 700;
+    }
+
+    .table-wrap {
+      overflow-x: auto;
+      border: 1px solid #e2e8f0;
+      border-radius: 16px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 760px;
+      background: white;
+    }
+
+    th,
+    td {
+      padding: 14px 16px;
+      text-align: left;
+      border-bottom: 1px solid #e2e8f0;
+      vertical-align: middle;
+    }
+
+    th {
+      background: #eef6ff;
+      color: #0b4c86;
+      font-size: 0.9rem;
+      text-transform: uppercase;
+    }
+
+    tr:last-child td {
+      border-bottom: 0;
+    }
+
+    .user-cell {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      min-width: 220px;
+    }
+
+    .table-avatar {
+      width: 42px;
+      height: 42px;
+      border-radius: 50%;
+      background: #ffcc33;
+      color: #0b4c86;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 800;
+      overflow: hidden;
+      flex: 0 0 42px;
+    }
+
+    .table-avatar img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+
+    .user-name {
+      font-weight: 800;
+      color: #1d2f4a;
+    }
+
+    .muted {
+      color: #64748b;
+      font-size: 0.92rem;
+    }
+
+    select {
+      padding: 10px 12px;
+      border: 1px solid #cbd5e1;
+      border-radius: 10px;
+      color: #1d2f4a;
+      background: #ffffff;
+      font-weight: 700;
+    }
+
+    .status-message {
+      color: #64748b;
+      padding: 18px;
+      text-align: center;
+    }
+  </style>
+  <link rel="stylesheet" href="auth.css">
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      const dropdownBtn = document.querySelector('.dropdown-btn');
+      const dropdownContent = document.querySelector('.dropdown-content');
+
+      dropdownBtn.addEventListener('click', function(e) {
+        e.preventDefault();
+        dropdownContent.classList.toggle('active');
+      });
+
+      document.addEventListener('click', function(e) {
+        if (!e.target.closest('.dropdown')) {
+          dropdownContent.classList.remove('active');
+        }
+      });
+
+      dropdownContent.querySelectorAll('a').forEach(link => {
+        link.addEventListener('click', function() {
+          dropdownContent.classList.remove('active');
+        });
+      });
+    });
+  </script>
+
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+</head>
+<body>
+<nav>
+  <div class="nav-wrapper">
+    <div class="logo">
+      <a href="index.html">
+        <img src="logo.jpg" alt="Viver Almonda">
+      </a>
+    </div>
+    <div class="menu">
+      <a href="index.html">Inicio</a>
+      <div class="dropdown">
+        <a class="dropdown-btn" href="javascript:void(0)">Atividades Desportivas &#9662;</a>
+        <div class="dropdown-content">
+          <a href="canoagem.html">Canoagem</a>
+          <a href="cross-trail.html">Cross Trail</a>
+        </div>
+      </div>
+      <a href="workshops.html">Workshops</a>
+      <a href="inscricoes.html">Inscri&#231;&#245;es</a>
+      <a href="administracao.html" data-admin-link hidden>Administra&#231;&#227;o</a>
+      <a href="#" data-login-link>Login</a>
+    </div>
+  </div>
+</nav>
+
+<main>
+  <section class="admin-gate" data-admin-loading>
+    <h2>A carregar administra&#231;&#227;o</h2>
+    <p>Estamos a confirmar o teu login e permiss&#227;o.</p>
+  </section>
+
+  <section class="admin-gate" data-admin-login hidden>
+    <h2>Inicia sess&#227;o</h2>
+    <p>Esta &#225;rea s&#243; est&#225; dispon&#237;vel para utilizadores com permiss&#227;o de admin.</p>
+    <button type="button" onclick="login(event)">Entrar com Google</button>
+  </section>
+
+  <section class="admin-gate" data-admin-denied hidden>
+    <h2>Acesso reservado</h2>
+    <p>A tua conta est&#225; registada como membro. Pede a um admin para alterar a tua permiss&#227;o.</p>
+  </section>
+
+  <section class="admin-panel" data-admin-panel hidden>
+    <h1 class="page-title">Administra&#231;&#227;o</h1>
+    <p class="page-text">Consulta os utilizadores que fizeram login no site e gere a permiss&#227;o de cada conta.</p>
+
+    <div class="admin-card">
+      <div class="admin-toolbar">
+        <div class="search-box">
+          <label for="userSearch">Procurar por nome ou email</label>
+          <input id="userSearch" type="search" placeholder="Escreve para procurar">
+        </div>
+        <div class="user-count" data-user-count>0 utilizadores</div>
+      </div>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Utilizador</th>
+              <th>Email</th>
+              <th>Permiss&#227;o</th>
+              <th>&#218;ltimo login</th>
+            </tr>
+          </thead>
+          <tbody id="usersTableBody">
+            <tr>
+              <td colspan="4" class="status-message">A carregar utilizadores...</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+</main>
+
+<script src="auth.js"></script>
+<script>
+const loadingView = document.querySelector("[data-admin-loading]");
+const loginView = document.querySelector("[data-admin-login]");
+const deniedView = document.querySelector("[data-admin-denied]");
+const panelView = document.querySelector("[data-admin-panel]");
+const tableBody = document.getElementById("usersTableBody");
+const searchInput = document.getElementById("userSearch");
+const userCount = document.querySelector("[data-user-count]");
+
+let users = [];
+let unsubscribeUsers = null;
+
+function setAdminView(viewName) {
+  loadingView.hidden = viewName !== "loading";
+  loginView.hidden = viewName !== "login";
+  deniedView.hidden = viewName !== "denied";
+  panelView.hidden = viewName !== "panel";
+}
+
+function formatDate(value) {
+  if (!value || !value.toDate) {
+    return "-";
+  }
+
+  return value.toDate().toLocaleString("pt-PT", {
+    dateStyle: "short",
+    timeStyle: "short"
+  });
+}
+
+function getInitial(user) {
+  const source = user.nome || user.email || "U";
+  return source.trim().charAt(0).toUpperCase();
+}
+
+function escapeHtml(value) {
+  return String(value || "")
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#039;");
+}
+
+function renderAvatar(user) {
+  if (user.foto) {
+    return `<span class="table-avatar"><img src="${escapeHtml(user.foto)}" alt=""></span>`;
+  }
+
+  return `<span class="table-avatar">${escapeHtml(getInitial(user))}</span>`;
+}
+
+function renderUsers() {
+  const search = searchInput.value.trim().toLowerCase();
+  const filteredUsers = users.filter((user) => {
+    const nome = (user.nome || "").toLowerCase();
+    const email = (user.email || "").toLowerCase();
+    return nome.includes(search) || email.includes(search);
+  });
+
+  userCount.textContent = `${filteredUsers.length} utilizador${filteredUsers.length === 1 ? "" : "es"}`;
+
+  if (!filteredUsers.length) {
+    tableBody.innerHTML = '<tr><td colspan="4" class="status-message">Nenhum utilizador encontrado.</td></tr>';
+    return;
+  }
+
+  tableBody.innerHTML = filteredUsers.map((user) => `
+    <tr>
+      <td>
+        <div class="user-cell">
+          ${renderAvatar(user)}
+          <div>
+            <div class="user-name">${escapeHtml(user.nome || "Sem nome")}</div>
+            <div class="muted">${escapeHtml(user.uid)}</div>
+          </div>
+        </div>
+      </td>
+      <td>${escapeHtml(user.email || "-")}</td>
+      <td>
+        <select data-user-id="${escapeHtml(user.uid)}" data-permission-select>
+          <option value="membro" ${user.permissao === "membro" ? "selected" : ""}>membro</option>
+          <option value="admin" ${user.permissao === "admin" ? "selected" : ""}>admin</option>
+        </select>
+      </td>
+      <td>${formatDate(user.lastLoginAt)}</td>
+    </tr>
+  `).join("");
+}
+
+function startUsersListener() {
+  if (unsubscribeUsers) {
+    return;
+  }
+
+  unsubscribeUsers = window.db.collection("users").onSnapshot((snapshot) => {
+    users = snapshot.docs.map((doc) => ({
+      uid: doc.id,
+      ...doc.data()
+    })).sort((a, b) => {
+      const left = (a.nome || a.email || "").toLowerCase();
+      const right = (b.nome || b.email || "").toLowerCase();
+      return left.localeCompare(right);
+    });
+
+    renderUsers();
+  }, (error) => {
+    console.error("Users list error:", error);
+    tableBody.innerHTML = '<tr><td colspan="4" class="status-message">Nao foi possivel carregar os utilizadores.</td></tr>';
+  });
+}
+
+function stopUsersListener() {
+  if (unsubscribeUsers) {
+    unsubscribeUsers();
+    unsubscribeUsers = null;
+  }
+}
+
+function handleProfile(profile) {
+  if (!window.auth.currentUser) {
+    stopUsersListener();
+    setAdminView("login");
+    return;
+  }
+
+  if (profile?.permissao !== "admin") {
+    stopUsersListener();
+    setAdminView("denied");
+    return;
+  }
+
+  setAdminView("panel");
+  startUsersListener();
+}
+
+document.addEventListener("auth-profile-changed", (event) => {
+  handleProfile(event.detail.profile);
+});
+
+searchInput.addEventListener("input", renderUsers);
+
+tableBody.addEventListener("change", async (event) => {
+  const select = event.target.closest("[data-permission-select]");
+
+  if (!select) {
+    return;
+  }
+
+  select.disabled = true;
+
+  try {
+    await window.db.collection("users").doc(select.dataset.userId).set({
+      permissao: select.value,
+      updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+    }, { merge: true });
+  } catch (error) {
+    console.error("Permission update error:", error);
+    alert("Nao foi possivel atualizar a permissao.");
+  } finally {
+    select.disabled = false;
+  }
+});
+
+if (window.currentUserProfile || document.body.classList.contains("auth-ready")) {
+  handleProfile(window.currentUserProfile);
+}
+</script>
+</body>
+</html>

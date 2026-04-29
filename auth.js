@@ -13,6 +13,7 @@ const db = firebase.firestore ? firebase.firestore() : null;
 
 window.auth = auth;
 window.db = db;
+window.currentUserProfile = null;
 
 function login(event) {
   if (event) {
@@ -50,6 +51,57 @@ function closeUserMenus() {
 function getUserInitial(user) {
   const source = user.displayName || user.email || "U";
   return source.trim().charAt(0).toUpperCase();
+}
+
+async function saveUserProfile(user) {
+  if (!db || !user) {
+    return null;
+  }
+
+  const userRef = db.collection("users").doc(user.uid);
+  const now = firebase.firestore.FieldValue.serverTimestamp();
+  const baseData = {
+    uid: user.uid,
+    nome: user.displayName || "",
+    email: user.email || "",
+    foto: user.photoURL || "",
+    updatedAt: now,
+    lastLoginAt: now
+  };
+
+  try {
+    await db.runTransaction(async (transaction) => {
+      const snapshot = await transaction.get(userRef);
+
+      if (snapshot.exists) {
+        const existingData = snapshot.data() || {};
+        transaction.set(userRef, {
+          ...baseData,
+          permissao: existingData.permissao || "membro"
+        }, { merge: true });
+        return;
+      }
+
+      transaction.set(userRef, {
+        ...baseData,
+        permissao: "membro",
+        createdAt: now
+      });
+    });
+
+    const savedSnapshot = await userRef.get();
+    return savedSnapshot.exists ? savedSnapshot.data() : null;
+  } catch (error) {
+    console.error("User profile error:", error);
+    return null;
+  }
+}
+
+function publishUserProfile(profile) {
+  window.currentUserProfile = profile;
+  document.dispatchEvent(new CustomEvent("auth-profile-changed", {
+    detail: { profile }
+  }));
 }
 
 function ensureUserMenus() {
@@ -108,13 +160,18 @@ function ensureUserMenus() {
   });
 }
 
-function updateAuthUI(user) {
+function updateAuthUI(user, profile) {
   document.body.classList.add("auth-ready");
   document.body.classList.toggle("is-logged-in", Boolean(user));
   document.body.classList.toggle("is-logged-out", !user);
+  document.body.classList.toggle("is-admin", profile?.permissao === "admin");
 
   document.querySelectorAll("[data-login-link]").forEach((link) => {
     link.hidden = Boolean(user);
+  });
+
+  document.querySelectorAll("[data-admin-link]").forEach((link) => {
+    link.hidden = profile?.permissao !== "admin";
   });
 
   document.querySelectorAll("[data-user-menu]").forEach((menu) => {
@@ -130,6 +187,7 @@ function updateAuthUI(user) {
   });
 
   if (!user) {
+    publishUserProfile(null);
     closeUserMenus();
     return;
   }
@@ -177,11 +235,14 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 });
 
-auth.onAuthStateChanged((user) => {
+auth.onAuthStateChanged(async (user) => {
+  const profile = user ? await saveUserProfile(user) : null;
+  publishUserProfile(profile);
+
   if (document.readyState === "loading") {
-    document.addEventListener("DOMContentLoaded", () => updateAuthUI(user), { once: true });
+    document.addEventListener("DOMContentLoaded", () => updateAuthUI(user, profile), { once: true });
   } else {
     ensureUserMenus();
-    updateAuthUI(user);
+    updateAuthUI(user, profile);
   }
 });

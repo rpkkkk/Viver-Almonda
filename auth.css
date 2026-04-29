@@ -6,6 +6,10 @@ body:not(.is-logged-in) a[href="inscricoes.html"] {
   display: none !important;
 }
 
+body:not(.is-admin) [data-admin-link] {
+  display: none !important;
+}
+
 .menu {
   flex-wrap: wrap;
 }
@@ -14,6 +18,8 @@ body:not(.is-logged-in) a[href="inscricoes.html"] {
   position: relative;
   display: inline-flex;
   align-items: center;
+  margin-left: 6px;
+  transform: translateY(-2px);
 }
 
 .user-avatar {
