@@ -146,6 +146,67 @@
       line-height: 1.7;
     }
 
+    .admin-section-menu {
+      position: relative;
+      width: fit-content;
+      margin: 0 0 24px;
+    }
+
+    .admin-section-button {
+      min-width: 250px;
+      border: 0;
+      border-radius: 12px;
+      padding: 14px 18px;
+      background: #0b4c86;
+      color: #ffffff;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+      font: inherit;
+      font-weight: 800;
+      box-shadow: 0 12px 24px rgba(11, 76, 134, 0.18);
+    }
+
+    .admin-section-list {
+      position: absolute;
+      top: calc(100% + 8px);
+      left: 0;
+      z-index: 30;
+      width: 100%;
+      overflow: hidden;
+      border-radius: 0 0 14px 14px;
+      background: #175a9f;
+      box-shadow: 0 18px 40px rgba(0, 0, 0, 0.22);
+    }
+
+    .admin-section-list[hidden] {
+      display: none;
+    }
+
+    .admin-section-option {
+      width: 100%;
+      border: 0;
+      padding: 14px 16px;
+      background: transparent;
+      color: #ffffff;
+      cursor: pointer;
+      display: block;
+      text-align: left;
+      font: inherit;
+      font-weight: 800;
+    }
+
+    .admin-section-option:hover,
+    .admin-section-option.is-active {
+      background: rgba(255, 255, 255, 0.13);
+    }
+
+    .admin-content-section[hidden] {
+      display: none;
+    }
+
     .admin-card,
     .admin-gate {
       background: white;
@@ -312,6 +373,17 @@
     }
 
     .settings-card p {
+      margin: 0;
+      color: #475569;
+      line-height: 1.7;
+    }
+
+    .admin-card h2 {
+      margin: 0 0 10px;
+      color: #0b4c86;
+    }
+
+    .admin-card > p {
       margin: 0;
       color: #475569;
       line-height: 1.7;
@@ -744,8 +816,21 @@
 
   <section class="admin-panel" data-admin-panel hidden>
     <h1 class="page-title">Administra&#231;&#227;o</h1>
-    <p class="page-text">Consulta os utilizadores que fizeram login no site e gere a permiss&#227;o de cada conta.</p>
+    <p class="page-text">Escolhe a area que queres gerir.</p>
 
+    <div class="admin-section-menu">
+      <button class="admin-section-button" type="button" data-admin-section-toggle aria-expanded="false">
+        <span data-admin-section-label>Editor visual do site (Beta Teste)</span>
+        <span aria-hidden="true">&#9662;</span>
+      </button>
+      <div class="admin-section-list" data-admin-section-list hidden>
+        <button class="admin-section-option is-active" type="button" data-admin-section-option="editor">Editor visual do site (Beta Teste)</button>
+        <button class="admin-section-option" type="button" data-admin-section-option="inscricoes">Inscri&#231;&#245;es</button>
+        <button class="admin-section-option" type="button" data-admin-section-option="membros">Membros</button>
+      </div>
+    </div>
+
+    <div class="admin-content-section" data-admin-section="editor">
     <div class="admin-card visual-editor-card">
       <h2>Editor visual do site</h2>
       <p>Edita textos, imagens, botoes e blocos das paginas principais. Arrasta os blocos para mudar a ordem e guarda para publicar.</p>
@@ -786,7 +871,9 @@
 
       <p class="editor-status" id="visualEditorStatus"></p>
     </div>
+    </div>
 
+    <div class="admin-content-section" data-admin-section="inscricoes" hidden>
     <div class="admin-card settings-card">
       <h2>Inscri&#231;&#245;es</h2>
       <p>Escolhe que atividades aparecem na p&#225;gina de inscri&#231;&#245;es e cria as datas dispon&#237;veis para cada uma.</p>
@@ -819,8 +906,13 @@
 
       <p class="config-status" data-config-status></p>
     </div>
+    </div>
 
+    <div class="admin-content-section" data-admin-section="membros" hidden>
     <div class="admin-card">
+      <h2>Membros</h2>
+      <p>Consulta os utilizadores que fizeram login no site e gere a permiss&#227;o de cada conta.</p>
+
       <div class="admin-toolbar">
         <div class="search-box">
           <label for="userSearch">Procurar por nome ou email</label>
@@ -847,6 +939,7 @@
         </table>
       </div>
     </div>
+    </div>
   </section>
 </main>
 
@@ -866,6 +959,11 @@ const visualBlocks = document.getElementById("visualBlocks");
 const visualPreview = document.getElementById("visualPreview");
 const visualEditorStatus = document.getElementById("visualEditorStatus");
 const saveVisualPageButton = document.getElementById("saveVisualPage");
+const adminSectionToggle = document.querySelector("[data-admin-section-toggle]");
+const adminSectionList = document.querySelector("[data-admin-section-list]");
+const adminSectionLabel = document.querySelector("[data-admin-section-label]");
+const adminSectionPanels = document.querySelectorAll("[data-admin-section]");
+const adminSectionOptions = document.querySelectorAll("[data-admin-section-option]");
 
 let users = [];
 let unsubscribeUsers = null;
@@ -889,6 +987,31 @@ const DEFAULT_INSCRIPTION_CONFIG = {
   }
 };
 let inscriptionConfig = cloneDefaultConfig();
+const ADMIN_SECTION_LABELS = {
+  editor: "Editor visual do site (Beta Teste)",
+  inscricoes: "Inscri\u00e7\u00f5es",
+  membros: "Membros"
+};
+
+function closeAdminSectionMenu() {
+  adminSectionList.hidden = true;
+  adminSectionToggle.setAttribute("aria-expanded", "false");
+}
+
+function setAdminSection(sectionId) {
+  const nextSection = ADMIN_SECTION_LABELS[sectionId] ? sectionId : "editor";
+
+  adminSectionPanels.forEach((panel) => {
+    panel.hidden = panel.dataset.adminSection !== nextSection;
+  });
+
+  adminSectionOptions.forEach((option) => {
+    option.classList.toggle("is-active", option.dataset.adminSectionOption === nextSection);
+  });
+
+  adminSectionLabel.textContent = ADMIN_SECTION_LABELS[nextSection];
+  closeAdminSectionMenu();
+}
 
 function setAdminView(viewName) {
   loadingView.hidden = viewName !== "loading";
@@ -1561,6 +1684,27 @@ document.addEventListener("auth-profile-changed", (event) => {
 });
 
 searchInput.addEventListener("input", renderUsers);
+
+adminSectionToggle.addEventListener("click", (event) => {
+  event.stopPropagation();
+  const willOpen = adminSectionList.hidden;
+  adminSectionList.hidden = !willOpen;
+  adminSectionToggle.setAttribute("aria-expanded", String(willOpen));
+});
+
+adminSectionOptions.forEach((option) => {
+  option.addEventListener("click", () => {
+    setAdminSection(option.dataset.adminSectionOption);
+  });
+});
+
+document.addEventListener("click", (event) => {
+  if (!event.target.closest(".admin-section-menu")) {
+    closeAdminSectionMenu();
+  }
+});
+
+setAdminSection("editor");
 
 editorPageSelect.addEventListener("change", () => {
   loadVisualPage(editorPageSelect.value);
