@@ -301,6 +301,109 @@
       padding: 18px;
       text-align: center;
     }
+
+    .settings-card {
+      margin-bottom: 26px;
+    }
+
+    .settings-card h2 {
+      margin: 0 0 10px;
+      color: #0b4c86;
+    }
+
+    .settings-card p {
+      margin: 0;
+      color: #475569;
+      line-height: 1.7;
+    }
+
+    .activity-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 18px;
+      margin-top: 22px;
+    }
+
+    .activity-config {
+      border: 1px solid #e2e8f0;
+      border-radius: 16px;
+      padding: 18px;
+      background: #f8fbff;
+    }
+
+    .activity-toggle {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      color: #0b4c86;
+      font-weight: 800;
+    }
+
+    .activity-toggle input {
+      width: 18px;
+      height: 18px;
+      accent-color: #0b4c86;
+    }
+
+    .date-form {
+      display: flex;
+      gap: 10px;
+      margin-top: 16px;
+    }
+
+    .date-form input {
+      flex: 1;
+      min-width: 0;
+      padding: 11px 12px;
+      border: 1px solid #cbd5e1;
+      border-radius: 10px;
+      font-size: 0.95rem;
+    }
+
+    .date-form button,
+    .date-remove {
+      border: 0;
+      border-radius: 999px;
+      cursor: pointer;
+      font-weight: 800;
+    }
+
+    .date-form button {
+      padding: 11px 14px;
+      background: #ffcc33;
+      color: #0b4c86;
+    }
+
+    .date-list {
+      display: grid;
+      gap: 8px;
+      margin-top: 14px;
+    }
+
+    .date-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      padding: 10px 12px;
+      border-radius: 12px;
+      background: #ffffff;
+      color: #1d2f4a;
+    }
+
+    .date-remove {
+      padding: 7px 10px;
+      background: #e8eef7;
+      color: #0b4c86;
+      flex: 0 0 auto;
+    }
+
+    .config-status {
+      margin-top: 14px !important;
+      min-height: 22px;
+      color: #64748b !important;
+      font-weight: 700;
+    }
   </style>
   <link rel="stylesheet" href="auth.css">
   <script>
@@ -377,6 +480,39 @@
     <h1 class="page-title">Administra&#231;&#227;o</h1>
     <p class="page-text">Consulta os utilizadores que fizeram login no site e gere a permiss&#227;o de cada conta.</p>
 
+    <div class="admin-card settings-card">
+      <h2>Inscri&#231;&#245;es</h2>
+      <p>Escolhe que atividades aparecem na p&#225;gina de inscri&#231;&#245;es e cria as datas dispon&#237;veis para cada uma.</p>
+
+      <div class="activity-grid">
+        <div class="activity-config" data-activity-card="canoagem">
+          <label class="activity-toggle">
+            <input type="checkbox" data-activity-enabled="canoagem">
+            Canoagem
+          </label>
+          <form class="date-form" data-date-form="canoagem">
+            <input type="text" data-date-input="canoagem" placeholder="Ex: Dia 30 Maio - Manha">
+            <button type="submit">Adicionar</button>
+          </form>
+          <div class="date-list" data-date-list="canoagem"></div>
+        </div>
+
+        <div class="activity-config" data-activity-card="crossTrail">
+          <label class="activity-toggle">
+            <input type="checkbox" data-activity-enabled="crossTrail">
+            Cross Trail
+          </label>
+          <form class="date-form" data-date-form="crossTrail">
+            <input type="text" data-date-input="crossTrail" placeholder="Ex: Dia 31 Maio - Tarde">
+            <button type="submit">Adicionar</button>
+          </form>
+          <div class="date-list" data-date-list="crossTrail"></div>
+        </div>
+      </div>
+
+      <p class="config-status" data-config-status></p>
+    </div>
+
     <div class="admin-card">
       <div class="admin-toolbar">
         <div class="search-box">
@@ -416,9 +552,27 @@ const panelView = document.querySelector("[data-admin-panel]");
 const tableBody = document.getElementById("usersTableBody");
 const searchInput = document.getElementById("userSearch");
 const userCount = document.querySelector("[data-user-count]");
+const configStatus = document.querySelector("[data-config-status]");
 
 let users = [];
 let unsubscribeUsers = null;
+let unsubscribeConfig = null;
+const ACTIVITY_KEYS = ["canoagem", "crossTrail"];
+const DEFAULT_INSCRIPTION_CONFIG = {
+  activities: {
+    canoagem: {
+      label: "Canoagem",
+      enabled: true,
+      dates: ["DIA 30 MAIO - MANHA", "DIA 30 MAIO - TARDE", "DIA 31 MAIO - MANHA"]
+    },
+    crossTrail: {
+      label: "Cross Trail",
+      enabled: true,
+      dates: ["DIA 30 MAIO - MANHA", "DIA 30 MAIO - TARDE", "DIA 31 MAIO - MANHA"]
+    }
+  }
+};
+let inscriptionConfig = cloneDefaultConfig();
 
 function setAdminView(viewName) {
   loadingView.hidden = viewName !== "loading";
@@ -527,9 +681,105 @@ function stopUsersListener() {
   }
 }
 
+function cloneDefaultConfig() {
+  return JSON.parse(JSON.stringify(DEFAULT_INSCRIPTION_CONFIG));
+}
+
+function getConfigRef() {
+  return window.db.collection("siteConfig").doc("inscricoes");
+}
+
+function normalizeInscriptionConfig(data) {
+  const config = cloneDefaultConfig();
+  const activities = data?.activities || {};
+
+  ACTIVITY_KEYS.forEach((key) => {
+    const savedActivity = activities[key] || {};
+    config.activities[key] = {
+      ...config.activities[key],
+      ...savedActivity,
+      dates: Array.isArray(savedActivity.dates) ? savedActivity.dates : config.activities[key].dates,
+      enabled: typeof savedActivity.enabled === "boolean" ? savedActivity.enabled : config.activities[key].enabled
+    };
+  });
+
+  return config;
+}
+
+function setConfigStatus(message) {
+  configStatus.textContent = message || "";
+}
+
+function renderActivitySettings() {
+  ACTIVITY_KEYS.forEach((key) => {
+    const activity = inscriptionConfig.activities[key];
+    const enabledInput = document.querySelector(`[data-activity-enabled="${key}"]`);
+    const dateList = document.querySelector(`[data-date-list="${key}"]`);
+
+    enabledInput.checked = activity.enabled;
+
+    if (!activity.dates.length) {
+      dateList.innerHTML = '<div class="status-message">Sem datas criadas.</div>';
+      return;
+    }
+
+    dateList.innerHTML = activity.dates.map((date, index) => `
+      <div class="date-item">
+        <span>${escapeHtml(date)}</span>
+        <button class="date-remove" type="button" data-remove-date="${key}" data-date-index="${index}">Remover</button>
+      </div>
+    `).join("");
+  });
+}
+
+async function saveInscriptionConfig(statusMessage) {
+  setConfigStatus("A guardar...");
+
+  try {
+    await getConfigRef().set({
+      activities: inscriptionConfig.activities,
+      updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+    }, { merge: true });
+
+    setConfigStatus(statusMessage || "Configuracao guardada.");
+  } catch (error) {
+    console.error("Inscription config save error:", error);
+    setConfigStatus("Nao foi possivel guardar as configuracoes.");
+  }
+}
+
+function startConfigListener() {
+  if (unsubscribeConfig) {
+    return;
+  }
+
+  unsubscribeConfig = getConfigRef().onSnapshot(async (snapshot) => {
+    if (!snapshot.exists) {
+      inscriptionConfig = cloneDefaultConfig();
+      renderActivitySettings();
+      await saveInscriptionConfig("Configuracao inicial criada.");
+      return;
+    }
+
+    inscriptionConfig = normalizeInscriptionConfig(snapshot.data());
+    renderActivitySettings();
+  }, (error) => {
+    console.error("Inscription config error:", error);
+    setConfigStatus("Nao foi possivel carregar as configuracoes.");
+  });
+}
+
+function stopConfigListener() {
+  if (unsubscribeConfig) {
+    unsubscribeConfig();
+    unsubscribeConfig = null;
+  }
+}
+
 function handleProfile(profile) {
   if (!window.auth.currentUser) {
     stopUsersListener();
+    stopConfigListener();
     setAdminView("login");
     return;
   }
@@ -538,12 +788,14 @@ function handleProfile(profile) {
 
   if (!isAdmin) {
     stopUsersListener();
+    stopConfigListener();
     setAdminView("denied");
     return;
   }
 
   setAdminView("panel");
   startUsersListener();
+  startConfigListener();
 }
 
 document.addEventListener("auth-profile-changed", (event) => {
@@ -551,6 +803,50 @@ document.addEventListener("auth-profile-changed", (event) => {
 });
 
 searchInput.addEventListener("input", renderUsers);
+
+document.querySelectorAll("[data-activity-enabled]").forEach((input) => {
+  input.addEventListener("change", async () => {
+    const key = input.dataset.activityEnabled;
+    inscriptionConfig.activities[key].enabled = input.checked;
+    await saveInscriptionConfig("Atividade atualizada.");
+  });
+});
+
+document.querySelectorAll("[data-date-form]").forEach((form) => {
+  form.addEventListener("submit", async (event) => {
+    event.preventDefault();
+
+    const key = form.dataset.dateForm;
+    const input = document.querySelector(`[data-date-input="${key}"]`);
+    const date = input.value.trim();
+
+    if (!date) {
+      return;
+    }
+
+    if (!inscriptionConfig.activities[key].dates.includes(date)) {
+      inscriptionConfig.activities[key].dates.push(date);
+    }
+
+    input.value = "";
+    await saveInscriptionConfig("Data adicionada.");
+  });
+});
+
+document.querySelectorAll("[data-date-list]").forEach((list) => {
+  list.addEventListener("click", async (event) => {
+    const button = event.target.closest("[data-remove-date]");
+
+    if (!button) {
+      return;
+    }
+
+    const key = button.dataset.removeDate;
+    const index = Number(button.dataset.dateIndex);
+    inscriptionConfig.activities[key].dates.splice(index, 1);
+    await saveInscriptionConfig("Data removida.");
+  });
+});
 
 tableBody.addEventListener("change", async (event) => {
   const select = event.target.closest("[data-permission-select]");

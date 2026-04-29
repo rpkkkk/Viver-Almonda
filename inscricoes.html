@@ -194,6 +194,18 @@
       opacity: 0.9;
     }
 
+    button:disabled {
+      opacity: 0.55;
+      cursor: not-allowed;
+    }
+
+    .form-message {
+      margin: 18px 0 0;
+      color: #64748b;
+      line-height: 1.6;
+      font-weight: 600;
+    }
+
     /* FOOTER */
     footer {
       background: #0b4c86;
@@ -291,8 +303,7 @@
 
       <label>Atividade</label>
       <select id="atividade" required>
-        <option value="Canoagem">Canoagem</option>
-        <option value="Cross Trail">Cross Trail</option>
+        <option value="">A carregar atividades...</option>
       </select>
 
       <label>Data pretendida</label>
@@ -317,6 +328,132 @@
 
 <script src="auth.js"></script>
 <script>
+const activitySelect = document.getElementById("atividade");
+const dateSelect = document.getElementById("data");
+const submitButton = document.querySelector('#formInscricao button[type="submit"]');
+const statusMessage = document.createElement("p");
+const ACTIVITY_KEYS = ["canoagem", "crossTrail"];
+const DEFAULT_INSCRIPTION_CONFIG = {
+  activities: {
+    canoagem: {
+      label: "Canoagem",
+      enabled: true,
+      dates: ["DIA 30 MAIO - MANHA", "DIA 30 MAIO - TARDE", "DIA 31 MAIO - MANHA"]
+    },
+    crossTrail: {
+      label: "Cross Trail",
+      enabled: true,
+      dates: ["DIA 30 MAIO - MANHA", "DIA 30 MAIO - TARDE", "DIA 31 MAIO - MANHA"]
+    }
+  }
+};
+let inscriptionConfig = cloneDefaultConfig();
+
+statusMessage.className = "form-message";
+statusMessage.id = "inscricaoStatus";
+dateSelect.insertAdjacentElement("afterend", statusMessage);
+submitButton.disabled = true;
+
+function cloneDefaultConfig() {
+  return JSON.parse(JSON.stringify(DEFAULT_INSCRIPTION_CONFIG));
+}
+
+function normalizeInscriptionConfig(data) {
+  const config = cloneDefaultConfig();
+  const activities = data?.activities || {};
+
+  ACTIVITY_KEYS.forEach((key) => {
+    const savedActivity = activities[key] || {};
+    config.activities[key] = {
+      ...config.activities[key],
+      ...savedActivity,
+      dates: Array.isArray(savedActivity.dates) ? savedActivity.dates : config.activities[key].dates,
+      enabled: typeof savedActivity.enabled === "boolean" ? savedActivity.enabled : config.activities[key].enabled
+    };
+  });
+
+  return config;
+}
+
+function addOption(select, value, label) {
+  const option = document.createElement("option");
+  option.value = value;
+  option.textContent = label;
+  select.appendChild(option);
+}
+
+function updateSubmitState() {
+  submitButton.disabled = !activitySelect.value || !dateSelect.value || dateSelect.disabled;
+}
+
+function renderDates() {
+  const activity = inscriptionConfig.activities[activitySelect.value];
+  dateSelect.innerHTML = "";
+
+  if (!activitySelect.value || !activity) {
+    addOption(dateSelect, "", "Selecione primeiro uma atividade");
+    dateSelect.disabled = true;
+    statusMessage.textContent = "";
+    updateSubmitState();
+    return;
+  }
+
+  if (!activity.dates.length) {
+    addOption(dateSelect, "", "Sem datas disponiveis");
+    dateSelect.disabled = true;
+    statusMessage.textContent = "Esta atividade ainda nao tem datas disponiveis.";
+    updateSubmitState();
+    return;
+  }
+
+  addOption(dateSelect, "", "Selecione uma data");
+  activity.dates.forEach((date) => addOption(dateSelect, date, date));
+  dateSelect.disabled = false;
+  statusMessage.textContent = "";
+  updateSubmitState();
+}
+
+function renderActivities() {
+  const previousValue = activitySelect.value;
+  const enabledActivities = ACTIVITY_KEYS
+    .map((key) => ({ key, ...inscriptionConfig.activities[key] }))
+    .filter((activity) => activity.enabled);
+
+  activitySelect.innerHTML = "";
+
+  if (!enabledActivities.length) {
+    addOption(activitySelect, "", "Sem atividades disponiveis");
+    activitySelect.disabled = true;
+    dateSelect.disabled = true;
+    statusMessage.textContent = "De momento nao existem atividades abertas para inscricao.";
+    updateSubmitState();
+    return;
+  }
+
+  addOption(activitySelect, "", "Selecione uma atividade");
+  enabledActivities.forEach((activity) => addOption(activitySelect, activity.key, activity.label));
+
+  activitySelect.disabled = false;
+  activitySelect.value = enabledActivities.some((activity) => activity.key === previousValue) ? previousValue : "";
+  renderDates();
+}
+
+function startInscriptionConfigListener() {
+  window.db.collection("siteConfig").doc("inscricoes").onSnapshot((snapshot) => {
+    inscriptionConfig = snapshot.exists ? normalizeInscriptionConfig(snapshot.data()) : cloneDefaultConfig();
+    renderActivities();
+  }, (error) => {
+    console.error("Inscription config error:", error);
+    inscriptionConfig = cloneDefaultConfig();
+    renderActivities();
+    statusMessage.textContent = "Nao foi possivel carregar as configuracoes mais recentes.";
+  });
+}
+
+activitySelect.addEventListener("change", renderDates);
+dateSelect.addEventListener("change", updateSubmitState);
+startInscriptionConfigListener();
+
 document.getElementById("formInscricao").addEventListener("submit", async (e) => {
   e.preventDefault();
 
@@ -327,12 +464,19 @@ document.getElementById("formInscricao").addEventListener("submit", async (e) =>
     return;
   }
 
+  if (submitButton.disabled) {
+    alert("Escolhe uma atividade e uma data disponivel.");
+    return;
+  }
+
+  const selectedActivity = inscriptionConfig.activities[activitySelect.value];
   const data = {
     nome: document.getElementById("nome").value,
     email: document.getElementById("email").value,
     telefone: document.getElementById("telefone").value,
-    atividade: document.getElementById("atividade").value,
-    dataEscolhida: document.getElementById("data").value,
+    atividade: selectedActivity?.label || activitySelect.value,
+    atividadeId: activitySelect.value,
+    dataEscolhida: dateSelect.value,
     userId: user.uid,
     userEmail: user.email,
     timestamp: new Date()
