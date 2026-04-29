@@ -614,6 +614,32 @@
       display: none;
     }
 
+    .gallery-upload-status {
+      min-height: 20px;
+      margin: 4px 0 0;
+      color: #64748b;
+      font-size: 0.92rem;
+      font-weight: 800;
+    }
+
+    .gallery-upload-status.is-error {
+      color: #9b1c1c;
+    }
+
+    .gallery-item-preview {
+      margin-bottom: 10px;
+      overflow: hidden;
+      border-radius: 12px;
+      background: #eef6ff;
+    }
+
+    .gallery-item-preview img {
+      width: 100%;
+      max-height: 180px;
+      display: block;
+      object-fit: cover;
+    }
+
     .editor-preview {
       max-height: 760px;
       overflow: auto;
@@ -908,6 +934,33 @@ function setVisualEditorStatus(message) {
   visualEditorStatus.textContent = message || "";
 }
 
+function setGalleryUploadStatus(blockId, message, isError = false) {
+  const status = document.querySelector(`[data-gallery-upload-status="${blockId}"]`);
+
+  if (status) {
+    status.textContent = message || "";
+    status.classList.toggle("is-error", Boolean(isError));
+  }
+
+  setVisualEditorStatus(message);
+}
+
+function getUploadErrorMessage(error) {
+  if (error?.code === "storage/unauthorized") {
+    return "Upload bloqueado pelo Firebase Storage. Confirma as regras de permissao.";
+  }
+
+  if (error?.code === "storage/bucket-not-found") {
+    return "Bucket do Firebase Storage nao encontrado. Confirma o storageBucket no auth.js.";
+  }
+
+  if (error?.code === "storage/canceled") {
+    return "Upload cancelado.";
+  }
+
+  return "Nao foi possivel carregar as fotos. Verifica o Firebase Storage e tenta novamente.";
+}
+
 function getFileTitle(fileName) {
   return String(fileName || "Imagem")
     .replace(/\.[^/.]+$/, "")
@@ -948,14 +1001,14 @@ async function uploadGalleryFiles(blockId, fileList) {
   }
 
   if (!window.storage) {
-    setVisualEditorStatus("Firebase Storage nao esta ativo nesta pagina.");
+    setGalleryUploadStatus(blockId, "Firebase Storage nao esta ativo nesta pagina.", true);
     return;
   }
 
   const files = getImageFiles(fileList);
 
   if (!files.length) {
-    setVisualEditorStatus("Escolhe ficheiros de imagem para carregar.");
+    setGalleryUploadStatus(blockId, "Escolhe ficheiros de imagem para carregar.", true);
     return;
   }
 
@@ -963,7 +1016,7 @@ async function uploadGalleryFiles(blockId, fileList) {
 
   try {
     for (const [index, file] of files.entries()) {
-      setVisualEditorStatus(`A carregar imagem ${index + 1} de ${files.length}: ${file.name}`);
+      setGalleryUploadStatus(blockId, `A carregar imagem ${index + 1} de ${files.length}: ${file.name}`);
 
       const title = getFileTitle(file.name);
       const ref = window.storage.ref(getUploadPath(block, file, index));
@@ -997,9 +1050,10 @@ async function uploadGalleryFiles(blockId, fileList) {
     block.items.push(...uploadedItems);
     renderVisualEditor();
     await saveVisualPage("Fotos carregadas e publicadas.");
+    setGalleryUploadStatus(blockId, "Fotos carregadas e publicadas.");
   } catch (error) {
     console.error("Gallery upload error:", error);
-    setVisualEditorStatus("Nao foi possivel carregar as fotos. Verifica o Firebase Storage e tenta novamente.");
+    setGalleryUploadStatus(blockId, getUploadErrorMessage(error), true);
   }
 }
 
@@ -1091,6 +1145,18 @@ function itemFieldHtml(block, item, index, label, field, type = "text") {
   return `<label>${label}<input type="${type}" value="${value}" data-block-id="${block.id}" data-item-index="${index}" data-item-field="${field}"></label>`;
 }
 
+function itemPreviewHtml(item) {
+  if (!item.image) {
+    return "";
+  }
+
+  return `
+    <div class="gallery-item-preview">
+      <img src="${escapeHtml(item.image)}" alt="${escapeHtml(item.alt || item.title || "Imagem")}">
+    </div>
+  `;
+}
+
 function canUploadImages(block) {
   return block.type === "gallery" || (block.type === "cards" && String(block.title || "").toLowerCase().includes("galeria"));
 }
@@ -1106,6 +1172,7 @@ function uploadBoxHtml(block) {
       <span>Tambem podes clicar aqui e escolher varias imagens</span>
       <input type="file" accept="image/*" multiple data-gallery-file-input="${block.id}">
     </label>
+    <p class="gallery-upload-status" data-gallery-upload-status="${block.id}"></p>
   `;
 }
 
@@ -1133,6 +1200,7 @@ function renderItemsEditor(block) {
 
     return `
       <div class="editor-item">
+        ${itemPreviewHtml(item)}
         ${titleInput}
         ${imageInput}
         ${textInput}
@@ -1148,7 +1216,7 @@ function renderItemsEditor(block) {
       <label>Itens</label>
       ${uploadBoxHtml(block)}
       <div class="editor-items">${itemHtml}</div>
-      <button class="block-action" type="button" data-add-item="${block.id}">Adicionar item</button>
+      <button class="block-action" type="button" data-add-item="${block.id}">${canUploadImages(block) ? "Adicionar item por URL" : "Adicionar item"}</button>
     </div>
   `;
 }
