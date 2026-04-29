@@ -15,9 +15,7 @@ const storage = firebase.storage ? firebase.storage() : null;
 const DEVELOPER_EMAILS = [
   "rodrigo.pereira6035@gmail.com"
 ];
-const SUPERADMIN_EMAILS = [
-  "rodrigo.pereira6035@gmail.com"
-];
+const SUPERADMIN_EMAILS = [];
 const ADMIN_EMAILS = [];
 const AUTH_PERMISSIONS = ["membro", "admin", "superadmin", "developer"];
 
