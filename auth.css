@@ -1,0 +1,149 @@
+[hidden] {
+  display: none !important;
+}
+
+body:not(.is-logged-in) a[href="inscricoes.html"] {
+  display: none !important;
+}
+
+.menu {
+  flex-wrap: wrap;
+}
+
+.user-menu {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+}
+
+.user-avatar {
+  width: 42px;
+  height: 42px;
+  padding: 0;
+  border: 2px solid rgba(255, 255, 255, 0.7);
+  border-radius: 50%;
+  background: #ffcc33;
+  color: #0b4c86;
+  cursor: pointer;
+  overflow: hidden;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.18);
+}
+
+.user-avatar:hover {
+  transform: translateY(-1px);
+}
+
+.user-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.user-avatar span {
+  width: 100%;
+  height: 100%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 800;
+  font-size: 1rem;
+}
+
+.user-dropdown {
+  position: absolute;
+  top: calc(100% + 10px);
+  right: 0;
+  width: min(260px, calc(100vw - 32px));
+  padding: 14px;
+  background: #ffffff;
+  color: #1d2f4a;
+  border-radius: 14px;
+  box-shadow: 0 18px 40px rgba(0, 0, 0, 0.22);
+  z-index: 40;
+}
+
+.user-dropdown p {
+  margin: 0;
+  line-height: 1.4;
+}
+
+.user-name {
+  font-weight: 800;
+  color: #0b4c86;
+}
+
+.user-email {
+  margin-top: 4px !important;
+  color: #64748b;
+  font-size: 0.9rem;
+  overflow-wrap: anywhere;
+}
+
+.signout-button,
+.auth-gate button {
+  width: auto;
+  margin-top: 14px;
+  padding: 11px 16px;
+  border: 0;
+  border-radius: 999px;
+  background: #0b4c86;
+  color: #ffffff;
+  font-weight: 700;
+  cursor: pointer;
+  font-size: 0.95rem;
+}
+
+.signout-button:hover,
+.auth-gate button:hover {
+  opacity: 0.9;
+}
+
+.auth-gate {
+  max-width: 760px;
+  margin: 60px auto;
+  padding: 36px 24px;
+  text-align: center;
+}
+
+.auth-gate-box {
+  background: #ffffff;
+  border-radius: 20px;
+  padding: 32px;
+  box-shadow: 0 15px 30px rgba(0, 0, 0, 0.08);
+}
+
+.auth-gate h2 {
+  margin: 0;
+  color: #0b4c86;
+}
+
+.auth-gate p {
+  margin: 14px 0 0;
+  color: #475569;
+  line-height: 1.7;
+}
+
+body:not(.auth-ready) [data-protected-content],
+body.is-logged-out [data-protected-content],
+body:not(.auth-ready) [data-auth-gate],
+body.is-logged-in [data-auth-gate] {
+  display: none !important;
+}
+
+@media (max-width: 720px) {
+  .nav-wrapper {
+    align-items: flex-start;
+  }
+
+  .menu {
+    justify-content: flex-end;
+  }
+
+  .user-dropdown {
+    right: -8px;
+  }
+}

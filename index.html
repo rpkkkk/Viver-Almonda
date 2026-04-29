@@ -341,6 +341,7 @@
       }
     }
   </style>
+  <link rel="stylesheet" href="auth.css">
   <script>
     document.addEventListener('DOMContentLoaded', function() {
       const dropdownBtn = document.querySelector('.dropdown-btn');
@@ -392,7 +393,7 @@
       </div>
       <a href="workshops.html">Workshops</a>
       <a href="inscricoes.html">Inscrições</a>
-      <a href="#" onclick="login()">Login</a>
+      <a href="#" data-login-link>Login</a>
     </div>
   </div>
 </nav>
@@ -507,28 +508,7 @@
   <p><a href="https://www.facebook.com/profile.php?id=100009631387664&locale=pt_PT" target="_blank">Facebook</a> · <a href="https://www.instagram.com/viver_almonda" target="_blank">Instagram</a></p>
 </footer>
 
-<script>
-const firebaseConfig = {
- apiKey: "AIzaSyBy1ESM6Sp1b2aY5kIpfNQiIRSIXhq7umY",
-  authDomain: "teste2-16ac7.firebaseapp.com",
-  projectId: "teste2-16ac7"
-};
-
-firebase.initializeApp(firebaseConfig);
-const auth = firebase.auth();
-const db = firebase.firestore();
-
-function login() {
-  const provider = new firebase.auth.GoogleAuthProvider();
-  auth.signInWithPopup(provider);
-}
-
-auth.onAuthStateChanged(user => {
-  if (user) {
-    console.log("User logged in:", user.email);
-  }
-});
-</script>
+<script src="auth.js"></script>
 
 </body>
 </html>
