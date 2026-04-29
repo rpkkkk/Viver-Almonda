@@ -580,6 +580,40 @@
       margin-top: 8px;
     }
 
+    .gallery-upload {
+      display: grid !important;
+      gap: 8px !important;
+      padding: 18px;
+      border: 2px dashed #9db8d5;
+      border-radius: 14px;
+      background: #eef6ff;
+      color: #0b4c86 !important;
+      text-align: center;
+      cursor: pointer;
+      transition: border-color 0.2s ease, background 0.2s ease, transform 0.2s ease;
+    }
+
+    .gallery-upload:hover,
+    .gallery-upload.is-dragover {
+      border-color: #0b4c86;
+      background: #e0f0ff;
+      transform: translateY(-1px);
+    }
+
+    .gallery-upload strong {
+      font-size: 1rem;
+    }
+
+    .gallery-upload span {
+      color: #475569;
+      font-size: 0.92rem;
+      font-weight: 700;
+    }
+
+    .gallery-upload input {
+      display: none;
+    }
+
     .editor-preview {
       max-height: 760px;
       overflow: auto;
@@ -638,6 +672,7 @@
   <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-storage-compat.js"></script>
 </head>
 <body>
 <nav>
@@ -873,6 +908,101 @@ function setVisualEditorStatus(message) {
   visualEditorStatus.textContent = message || "";
 }
 
+function getFileTitle(fileName) {
+  return String(fileName || "Imagem")
+    .replace(/\.[^/.]+$/, "")
+    .replace(/[-_]+/g, " ")
+    .trim() || "Imagem";
+}
+
+function getSafeFileName(fileName) {
+  const safeName = String(fileName || "imagem")
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^a-zA-Z0-9._-]+/g, "-")
+    .replace(/-+/g, "-")
+    .replace(/^-|-$/g, "")
+    .toLowerCase();
+
+  return safeName || "imagem";
+}
+
+function isEmptyGalleryItem(item) {
+  return !item.image && !item.alt && !item.text && (!item.title || item.title === "Imagem");
+}
+
+function getUploadPath(block, file, index) {
+  const id = window.crypto?.randomUUID ? window.crypto.randomUUID() : `${Date.now()}-${index}-${Math.random().toString(16).slice(2)}`;
+  return `site-gallery/${visualPageId}/${block.id}/${id}-${getSafeFileName(file.name)}`;
+}
+
+function getImageFiles(fileList) {
+  return Array.from(fileList || []).filter((file) => String(file.type || "").startsWith("image/"));
+}
+
+async function uploadGalleryFiles(blockId, fileList) {
+  const block = findVisualBlock(blockId);
+
+  if (!block || !canUploadImages(block)) {
+    return;
+  }
+
+  if (!window.storage) {
+    setVisualEditorStatus("Firebase Storage nao esta ativo nesta pagina.");
+    return;
+  }
+
+  const files = getImageFiles(fileList);
+
+  if (!files.length) {
+    setVisualEditorStatus("Escolhe ficheiros de imagem para carregar.");
+    return;
+  }
+
+  const uploadedItems = [];
+
+  try {
+    for (const [index, file] of files.entries()) {
+      setVisualEditorStatus(`A carregar imagem ${index + 1} de ${files.length}: ${file.name}`);
+
+      const title = getFileTitle(file.name);
+      const ref = window.storage.ref(getUploadPath(block, file, index));
+      const snapshot = await ref.put(file, {
+        contentType: file.type || "image/jpeg",
+        customMetadata: {
+          pageId: visualPageId,
+          blockId: block.id,
+          uploadedBy: window.auth.currentUser?.email || ""
+        }
+      });
+      const image = await snapshot.ref.getDownloadURL();
+
+      const uploadedItem = {
+        title,
+        image,
+        alt: title
+      };
+
+      if (block.type === "cards") {
+        uploadedItem.text = "";
+      }
+
+      uploadedItems.push(uploadedItem);
+    }
+
+    if (block.type === "gallery") {
+      block.items = block.items.filter((item) => !isEmptyGalleryItem(item));
+    }
+
+    block.items.push(...uploadedItems);
+    renderVisualEditor();
+    await saveVisualPage("Fotos carregadas e publicadas.");
+  } catch (error) {
+    console.error("Gallery upload error:", error);
+    setVisualEditorStatus("Nao foi possivel carregar as fotos. Verifica o Firebase Storage e tenta novamente.");
+  }
+}
+
 function createBlock(type) {
   const block = {
     id: `block-${Date.now()}-${Math.random().toString(16).slice(2)}`,
@@ -961,6 +1091,28 @@ function itemFieldHtml(block, item, index, label, field, type = "text") {
   return `<label>${label}<input type="${type}" value="${value}" data-block-id="${block.id}" data-item-index="${index}" data-item-field="${field}"></label>`;
 }
 
+function canUploadImages(block) {
+  return block.type === "gallery" || (block.type === "cards" && String(block.title || "").toLowerCase().includes("galeria"));
+}
+
+function uploadBoxHtml(block) {
+  if (!canUploadImages(block)) {
+    return "";
+  }
+
+  return `
+    <label class="gallery-upload" data-gallery-upload="${block.id}">
+      <strong>Arrastar fotos para esta galeria</strong>
+      <span>Tambem podes clicar aqui e escolher varias imagens</span>
+      <input type="file" accept="image/*" multiple data-gallery-file-input="${block.id}">
+    </label>
+  `;
+}
+
+function isFileDrag(event) {
+  return Array.from(event.dataTransfer?.types || []).includes("Files");
+}
+
 function renderItemsEditor(block) {
   const usesItems = ["cards", "gallery", "list", "contact"].includes(block.type);
 
@@ -994,6 +1146,7 @@ function renderItemsEditor(block) {
   return `
     <div class="editor-field">
       <label>Itens</label>
+      ${uploadBoxHtml(block)}
       <div class="editor-items">${itemHtml}</div>
       <button class="block-action" type="button" data-add-item="${block.id}">Adicionar item</button>
     </div>
@@ -1072,7 +1225,7 @@ async function loadVisualPage(pageId) {
   }
 }
 
-async function saveVisualPage() {
+async function saveVisualPage(successMessage = "Pagina guardada e publicada.") {
   if (!visualPage) {
     return;
   }
@@ -1085,7 +1238,7 @@ async function saveVisualPage() {
       blocks: visualPage.blocks,
       updatedAt: firebase.firestore.FieldValue.serverTimestamp()
     });
-    setVisualEditorStatus("Pagina guardada e publicada.");
+    setVisualEditorStatus(successMessage);
   } catch (error) {
     console.error("Visual editor save error:", error);
     setVisualEditorStatus("Nao foi possivel guardar a pagina.");
@@ -1290,7 +1443,7 @@ editorPageSelect.addEventListener("change", () => {
   loadVisualPage(editorPageSelect.value);
 });
 
-saveVisualPageButton.addEventListener("click", saveVisualPage);
+saveVisualPageButton.addEventListener("click", () => saveVisualPage());
 
 document.querySelectorAll("[data-add-block]").forEach((button) => {
   button.addEventListener("click", () => {
@@ -1331,6 +1484,60 @@ visualBlocks.addEventListener("change", (event) => {
     block.visible = event.target.checked;
     renderVisualPreviewOnly();
   }
+});
+
+visualBlocks.addEventListener("change", async (event) => {
+  const input = event.target.closest("[data-gallery-file-input]");
+
+  if (!input) {
+    return;
+  }
+
+  await uploadGalleryFiles(input.dataset.galleryFileInput, input.files);
+  input.value = "";
+});
+
+visualBlocks.addEventListener("dragenter", (event) => {
+  const uploadArea = event.target.closest("[data-gallery-upload]");
+
+  if (!uploadArea || !isFileDrag(event)) {
+    return;
+  }
+
+  event.preventDefault();
+  uploadArea.classList.add("is-dragover");
+});
+
+visualBlocks.addEventListener("dragover", (event) => {
+  const uploadArea = event.target.closest("[data-gallery-upload]");
+
+  if (!uploadArea || !isFileDrag(event)) {
+    return;
+  }
+
+  event.preventDefault();
+  event.dataTransfer.dropEffect = "copy";
+  uploadArea.classList.add("is-dragover");
+});
+
+visualBlocks.addEventListener("dragleave", (event) => {
+  const uploadArea = event.target.closest("[data-gallery-upload]");
+
+  if (uploadArea && !uploadArea.contains(event.relatedTarget)) {
+    uploadArea.classList.remove("is-dragover");
+  }
+});
+
+visualBlocks.addEventListener("drop", async (event) => {
+  const uploadArea = event.target.closest("[data-gallery-upload]");
+
+  if (!uploadArea) {
+    return;
+  }
+
+  event.preventDefault();
+  uploadArea.classList.remove("is-dragover");
+  await uploadGalleryFiles(uploadArea.dataset.galleryUpload, event.dataTransfer.files);
 });
 
 visualBlocks.addEventListener("click", (event) => {

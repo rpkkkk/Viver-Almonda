@@ -1,7 +1,8 @@
 const firebaseConfig = {
   apiKey: "AIzaSyBy1ESM6Sp1b2aY5kIpfNQiIRSIXhq7umY",
   authDomain: "teste2-16ac7.firebaseapp.com",
-  projectId: "teste2-16ac7"
+  projectId: "teste2-16ac7",
+  storageBucket: "teste2-16ac7.firebasestorage.app"
 };
 
 if (!firebase.apps.length) {
@@ -10,12 +11,14 @@ if (!firebase.apps.length) {
 
 const auth = firebase.auth();
 const db = firebase.firestore ? firebase.firestore() : null;
+const storage = firebase.storage ? firebase.storage() : null;
 const ADMIN_EMAILS = [
   "rodrigo.pereira6035@gmail.com"
 ];
 
 window.auth = auth;
 window.db = db;
+window.storage = storage;
 window.currentUserProfile = null;
 
 function isAdminEmail(email) {
