@@ -93,9 +93,9 @@
 
 .cms-section {
   box-sizing: border-box;
-  max-width: 1180px;
+  width: min(100% - 48px, 1180px);
   margin: 0 auto;
-  padding: 58px 24px;
+  padding: 58px 0;
   background: #f7f9fc;
   color: #1d2f4a;
 }
@@ -103,12 +103,14 @@
 .cms-section h2 {
   color: #0b4c86;
   font-size: clamp(2rem, 2.5vw, 2.6rem);
+  text-align: center;
 }
 
 .cms-section > p {
   max-width: 900px;
-  margin: 16px 0 0;
+  margin: 16px auto 0;
   color: #475569;
+  text-align: center;
 }
 
 .cms-grid {
@@ -144,8 +146,9 @@
 .cms-list {
   display: grid;
   gap: 14px;
+  max-width: 980px;
   padding: 0;
-  margin: 26px 0 0;
+  margin: 26px auto 0;
   list-style: none;
 }
 
@@ -162,7 +165,8 @@
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
   gap: 18px;
-  margin-top: 36px;
+  max-width: 980px;
+  margin: 36px auto 0;
 }
 
 .cms-highlight-box {
@@ -185,7 +189,8 @@
 
 .cms-gallery {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(240px, 320px));
+  justify-content: center;
   gap: 18px;
   max-width: 980px;
   margin: 26px auto 0;
@@ -197,6 +202,8 @@
 
 .cms-gallery img,
 .cms-image img {
+  aspect-ratio: 4 / 3;
+  height: 100%;
   max-height: 420px;
   border-radius: 18px;
   box-shadow: 0 14px 30px rgba(0, 0, 0, 0.08);
